@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@300;400;600;700;800&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background: #0f1419;
+  color: #ffffff;
+}
+
+html, body {
+  height: 100%;
+}
+
+// Override Angular Material styles for dark theme
+.mat-mdc-chip {
+  --mdc-chip-elevated-container-color: rgba(255, 255, 255, 0.05) !important;
+  --mdc-chip-label-text-color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.mat-mdc-card {
+  --mdc-elevated-card-container-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+// User menu styles
+.mat-mdc-menu-panel,
+.mat-menu-panel {
+  background: rgba(30, 35, 60, 0.95) !important;
+  
+  .user-info {
+    padding: 16px;
+    
+    .user-name {
+      color: #ffffff !important;
+      font-weight: 500;
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+    }
+    
+    .user-email {
+      color: rgba(255, 255, 255, 0.65) !important;
+      font-size: 0.8rem;
+    }
+  }
+  
+  .mat-mdc-menu-item,
+  .mat-menu-item {
+    color: rgba(255, 255, 255, 0.85) !important;
+    
+    span {
+      color: rgba(255, 255, 255, 0.85) !important;
+    }
+    
+    &:hover {
+      background: rgba(102, 126, 234, 0.2) !important;
+      
+      span {
+        color: #ffffff !important;
+      }
+    }
+  }
+}

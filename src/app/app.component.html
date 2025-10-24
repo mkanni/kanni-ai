@@ -1,0 +1,73 @@
+<div class="container">
+  <header class="header">
+    <div class="logo-section">
+      <div class="logo">Kanni Ai</div>
+      <div class="tagline">AI Learning Assistant</div>
+    </div>
+    <nav class="nav-menu">
+      <a href="#subscriptions" class="nav-item">Subscriptions</a>
+      <a href="#pricing" class="nav-item">Pricing</a>
+      <a href="#about" class="nav-item">About</a>
+      <div class="user-menu">
+        <button class="user-avatar" [matMenuTriggerFor]="userMenu">
+          {{ getUserInitials() }}
+        </button>
+        <mat-menu #userMenu="matMenu" xPosition="before">
+          <div class="user-info" *ngIf="currentUser">
+            <div class="user-name">{{ username || 'User' }}</div>
+            <div class="user-email">{{ currentUser.email || 'No email' }}</div>
+          </div>
+          <div class="user-info" *ngIf="!currentUser">
+            <div class="user-name">Loading...</div>
+          </div>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()">
+            <span>Logout</span>
+          </button>
+        </mat-menu>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Neural Network Background -->
+  <canvas #networkCanvas class="network-canvas"></canvas>
+
+  <div class="content">
+    <div class="typewriter-section">
+      <h1 class="typewriter">
+        {{ typewriterText }}<span class="cursor">|</span>
+      </h1>
+    </div>
+
+    <div class="tip-section">
+      <mat-card class="tip-card" [class.cohesive]="isCohesive" [class.has-content]="generatedTip">
+        <div class="cohesive-badge" *ngIf="isCohesive && generatedTip">
+          <span class="badge-icon">🔗</span>
+          <span class="badge-text">Cohesive Learning: {{ selectedInterests.join(' + ') }}</span>
+        </div>
+        <mat-card-content>
+          <div class="placeholder" *ngIf="!generatedTip && !isLoading">
+            <span class="placeholder-icon">💡</span>
+            <p>Click the button below to generate your personalized learning tip</p>
+          </div>
+          <div class="loading-state" *ngIf="isLoading">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Generating your learning tip...</p>
+          </div>
+          <p *ngIf="generatedTip" class="tip-content">{{ generatedTip }}</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="button-section">
+      <button 
+        mat-raised-button 
+        class="generate-button"
+        (click)="generateTip()"
+        [disabled]="isLoading">
+        <span *ngIf="!isLoading">Generate Learning Tip</span>
+        <span *ngIf="isLoading">Generating...</span>
+      </button>
+    </div>
+  </div>
+</div>

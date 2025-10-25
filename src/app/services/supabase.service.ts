@@ -19,15 +19,22 @@ export class SupabaseService {
 
     try {
       // Get Supabase credentials from environment
+      console.log('Window env object:', (window as any).env);
       const supabaseUrl = (window as any).env?.SUPABASE_URL || '';
       const supabaseAnonKey = (window as any).env?.SUPABASE_ANON_KEY || '';
 
+      console.log('Supabase URL:', supabaseUrl);
+      console.log('Supabase Anon Key present:', !!supabaseAnonKey);
+
       if (!supabaseUrl || !supabaseAnonKey) {
         console.error('Supabase credentials not configured in environment');
-        return;
+        console.error('URL:', supabaseUrl, 'Key:', supabaseAnonKey);
+        throw new Error('Supabase credentials missing');
       }
 
+      console.log('Creating Supabase client...');
       this.supabase = createClient(supabaseUrl, supabaseAnonKey);
+      console.log('Supabase client created successfully');
       
       // Check active session
       const { data: { session } } = await this.supabase.auth.getSession();
@@ -63,6 +70,11 @@ export class SupabaseService {
   }
 
   async signIn(email: string, password: string): Promise<{ user: User | null; error: AuthError | null }> {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized');
+      return { user: null, error: { message: 'Supabase client not initialized' } as AuthError };
+    }
+    
     console.log('Attempting sign in...');
     const { data, error } = await this.supabase.auth.signInWithPassword({
       email,
@@ -82,6 +94,11 @@ export class SupabaseService {
   }
 
   async signInWithGoogle(): Promise<{ error: AuthError | null }> {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized');
+      return { error: { message: 'Supabase client not initialized' } as AuthError };
+    }
+    
     const { error } = await this.supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -92,6 +109,11 @@ export class SupabaseService {
   }
 
   async signInWithGithub(): Promise<{ error: AuthError | null }> {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized');
+      return { error: { message: 'Supabase client not initialized' } as AuthError };
+    }
+    
     const { error } = await this.supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
@@ -117,6 +139,11 @@ export class SupabaseService {
   }
 
   async getSession(): Promise<Session | null> {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized');
+      return null;
+    }
+    
     const { data: { session } } = await this.supabase.auth.getSession();
     return session;
   }

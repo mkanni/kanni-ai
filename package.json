@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "node scripts/load-env.js && ng serve",
-    "build": "ng build",
+    "start": "node scripts/generate-env.js && ng serve",
+    "build": "node scripts/generate-env.js && ng build",
     "watch": "ng build --watch --configuration development",
     "serve": "ng serve",
-    "prestart": "node scripts/load-env.js",
+    "prestart": "node scripts/generate-env.js",
     "test": "echo 'No tests configured' && exit 0"
   },
   "private": true,
@@ -42,7 +42,7 @@
     "@angular/cli": "^16.2.0",
     "@angular/compiler-cli": "^16.2.0",
     "@types/node": "^18.19.130",
-    "dotenv": "^16.3.1",
+    "dotenv": "^16.6.1",
     "typescript": "~5.1.3"
   }
 }

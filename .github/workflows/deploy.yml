@@ -62,6 +62,9 @@ jobs:
     - name: Build the Docker image
       run: |-
         docker build \
+          --build-arg SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
+          --build-arg SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}" \
+          --build-arg INTERESTS="${{ secrets.INTERESTS }}" \
           --tag "gcr.io/${{ secrets.GCP_PROJECT_ID }}/$IMAGE:$GITHUB_SHA" \
           --tag "gcr.io/${{ secrets.GCP_PROJECT_ID }}/$IMAGE:latest" \
           .

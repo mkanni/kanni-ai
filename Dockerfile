@@ -4,16 +4,23 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
 COPY . .
+
+# Build arguments for environment variables
+ARG SUPABASE_URL
+ARG SUPABASE_ANON_KEY
+ARG INTERESTS
+
+# Set environment variables for the build
+ENV SUPABASE_URL=$SUPABASE_URL
+ENV SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+ENV INTERESTS=$INTERESTS
+
 RUN npm run build
 
 # Production stage
 FROM nginx:alpine
 COPY --from=build /app/dist/kanni-poc /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
-
-# Ensure assets directory exists and copy env.js
-RUN mkdir -p /usr/share/nginx/html/assets
-COPY --from=build /app/src/assets/env.js /usr/share/nginx/html/assets/env.js
 
 # Add OpenTelemetry instrumentation
 RUN apk add --no-cache curl

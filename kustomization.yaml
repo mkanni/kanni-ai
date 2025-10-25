@@ -7,7 +7,7 @@ resources:
 - k8s/service.yaml
 - k8s/ingress.yaml
 - k8s/hpa.yaml
-- k8s/otel-collector.yaml
+# - k8s/otel-collector.yaml  # Temporarily disabled - requires OpenTelemetry Operator
 
 images:
 - name: gcr.io/PROJECT_ID/IMAGE:TAG
@@ -16,7 +16,7 @@ images:
 
 replicas:
 - name: kanni-ai-app
-  count: 2
+  count: 1
 
 patches:
 - target:

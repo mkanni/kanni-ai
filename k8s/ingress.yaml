@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kanni-ai-ingress
+  namespace: kanni-ai
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "kanni-ai-ip"
+    networking.gke.io/managed-certificates: "kanni-ai-ssl-cert"
+    kubernetes.io/ingress.allow-http: "false"
+spec:
+  rules:
+  - host: kanni-ai.de
+    http:
+      paths:
+      - path: /*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: kanni-ai-service
+            port:
+              number: 80
+---
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: kanni-ai-ssl-cert
+  namespace: kanni-ai
+spec:
+  domains:
+    - kanni-ai.de

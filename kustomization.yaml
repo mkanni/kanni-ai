@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- k8s/namespace.yaml
+- k8s/deployment.yaml
+- k8s/service.yaml
+- k8s/ingress.yaml
+- k8s/hpa.yaml
+- k8s/otel-collector.yaml
+
+images:
+- name: gcr.io/PROJECT_ID/IMAGE:TAG
+  newName: gcr.io/lucky-antler-476111-g9/kanni-ai
+  newTag: latest
+
+replicas:
+- name: kanni-ai-app
+  count: 2
+
+patches:
+- target:
+    kind: Deployment
+    name: kanni-ai-app
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/image
+      value: gcr.io/lucky-antler-476111-g9/kanni-ai:latest

@@ -12,6 +12,7 @@ env:
   DEPLOYMENT_NAME: kanni-ai-app
   IMAGE: kanni-ai
   NAMESPACE: kanni-ai
+  USE_GKE_GCLOUD_AUTH_PLUGIN: True
 
 jobs:
   setup-build-publish-deploy:
@@ -45,6 +46,10 @@ jobs:
 
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v2
+
+    - name: Install GKE gcloud auth plugin
+      run: |-
+        gcloud components install gke-gcloud-auth-plugin
 
     - name: Configure Docker to use gcloud as a credential helper
       run: |-

@@ -59,6 +59,13 @@ jobs:
       run: |-
         gcloud container clusters get-credentials "$GKE_CLUSTER" --region "$GKE_REGION" --project "${{ secrets.GCP_PROJECT_ID }}"
 
+    - name: Debug secrets availability
+      run: |-
+        echo "Checking secrets availability:"
+        echo "SUPABASE_URL exists: ${{ secrets.SUPABASE_URL != '' }}"
+        echo "SUPABASE_ANON_KEY exists: ${{ secrets.SUPABASE_ANON_KEY != '' }}"
+        echo "INTERESTS exists: ${{ secrets.INTERESTS != '' }}"
+
     - name: Build the Docker image
       run: |-
         docker build \

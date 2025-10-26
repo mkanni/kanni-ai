@@ -5,25 +5,27 @@ COPY package*.json ./
 RUN npm ci
 COPY . .
 
-# Build arguments for environment variables
-ARG SUPABASE_URL
-ARG SUPABASE_ANON_KEY
-ARG INTERESTS
+# Build arguments for environment variables (with defaults to prevent empty values)
+ARG SUPABASE_URL=""
+ARG SUPABASE_ANON_KEY=""
+ARG INTERESTS=""
 
 # Debug: Show what build args were received
-RUN echo "Build args received:"
-RUN echo "SUPABASE_URL: $SUPABASE_URL"
-RUN echo "SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:+[SET]}"
-RUN echo "INTERESTS: ${INTERESTS:+[SET]}"
+RUN echo "Build args received:" && \
+    echo "SUPABASE_URL: ${SUPABASE_URL}" && \
+    echo "SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:+[SET]}" && \
+    echo "INTERESTS: ${INTERESTS:+[SET]}"
 
-# Set environment variables for the build
-ENV SUPABASE_URL=$SUPABASE_URL
-ENV SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
-ENV INTERESTS=$INTERESTS
+# Set environment variables for the build (ensure they're set even if empty)
+ENV SUPABASE_URL=${SUPABASE_URL}
+ENV SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+ENV INTERESTS=${INTERESTS}
 
 # Debug: Verify environment variables are set
-RUN echo "Environment variables set:"
-RUN echo "SUPABASE_URL: $SUPABASE_URL"
+RUN echo "Environment variables set:" && \
+    echo "SUPABASE_URL: ${SUPABASE_URL}" && \
+    echo "SUPABASE_ANON_KEY exists: ${SUPABASE_ANON_KEY:+YES}" && \
+    echo "INTERESTS exists: ${INTERESTS:+YES}"
 
 RUN npm run build
 

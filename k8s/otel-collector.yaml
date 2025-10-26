@@ -16,7 +16,7 @@ spec:
         secretKeyRef:
           name: grafana-tokens
           key: loki-token
-  config: |
+  config:
     receivers:
       otlp:
         protocols:
@@ -47,21 +47,12 @@ spec:
         headers:
           authorization: "Bearer ${GRAFANA_PROMETHEUS_TOKEN}"
       
-      loki:
-        endpoint: "https://logs-prod-eu-west-0.grafana.net/loki/api/v1/push"
-        headers:
-          authorization: "Bearer ${GRAFANA_LOKI_TOKEN}"
-      
-      logging:
-        loglevel: debug
+      debug:
+        verbosity: detailed
 
     service:
       pipelines:
         metrics:
           receivers: [otlp, prometheus]
           processors: [batch, resource]
-          exporters: [prometheusremotewrite, logging]
-        logs:
-          receivers: [otlp]
-          processors: [batch, resource]
-          exporters: [loki, logging]
+          exporters: [prometheusremotewrite, debug]

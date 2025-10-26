@@ -92,11 +92,29 @@ jobs:
 
     - name: Deploy
       run: |-
-        # Replace the image name in the k8s template
+        # Replace the image name in the k8s template with commit SHA
         ./kustomize edit set image gcr.io/PROJECT_ID/IMAGE:TAG=gcr.io/${{ secrets.GCP_PROJECT_ID }}/$IMAGE:$GITHUB_SHA
         
-        # Replace Grafana tokens in the secret
-        ./kustomize build . | sed "s/GRAFANA_PROMETHEUS_TOKEN_PLACEHOLDER/${{ secrets.GRAFANA_PROMETHEUS_TOKEN }}/g" | sed "s/GRAFANA_LOKI_TOKEN_PLACEHOLDER/${{ secrets.GRAFANA_LOKI_TOKEN }}/g" | kubectl apply -f -
+        # Generate timestamp for forced restart
+        RESTART_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
         
-        kubectl rollout status deployment/$DEPLOYMENT_NAME -n $NAMESPACE
+        # Apply the deployment with restart annotation and updated image
+        ./kustomize build . | \
+          sed "s/GRAFANA_PROMETHEUS_TOKEN_PLACEHOLDER/${{ secrets.GRAFANA_PROMETHEUS_TOKEN }}/g" | \
+          sed "s/GRAFANA_LOKI_TOKEN_PLACEHOLDER/${{ secrets.GRAFANA_LOKI_TOKEN }}/g" | \
+          sed "s/placeholder-timestamp/$RESTART_TIME/g" | \
+          kubectl apply -f -
+        
+        # Force restart the deployment to ensure new pods are created with new image
+        kubectl rollout restart deployment/$DEPLOYMENT_NAME -n $NAMESPACE
+        
+        # Wait for rollout to complete
+        kubectl rollout status deployment/$DEPLOYMENT_NAME -n $NAMESPACE --timeout=300s
+        
+        # Verify deployment
+        echo "Deployment completed. Current status:"
+        kubectl get pods -n $NAMESPACE -l app=kanni-ai -o wide
+        echo "Image being used:"
+        kubectl get deployment $DEPLOYMENT_NAME -n $NAMESPACE -o jsonpath='{.spec.template.spec.containers[0].image}'
+        echo ""
         kubectl get services -o wide -n $NAMESPACE

@@ -23,7 +23,7 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "80"
         prometheus.io/path: "/metrics"
-        kubectl.kubernetes.io/restartedAt: "2024-10-26T15:30:00Z"
+        deployment.kubernetes.io/restartedAt: "placeholder-timestamp"
     spec:
       containers:
       - name: kanni-ai

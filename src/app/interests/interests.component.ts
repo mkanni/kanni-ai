@@ -134,35 +134,7 @@ export class InterestsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.router.navigate(['/home']);
   }
 
-  async logout(): Promise<void> {
-    try {
-      const { error } = await this.supabaseService.signOut();
-      if (!error) {
-        this.router.navigate(['/login']);
-      } else {
-        console.error('Error logging out:', error);
-        alert('Failed to logout. Please try again.');
-      }
-    } catch (error) {
-      console.error('Exception during logout:', error);
-      alert('Failed to logout. Please try again.');
-    }
-  }
 
-  getUserInitials(): string {
-    if (!this.currentUser) return '??';
-    
-    const email = this.currentUser.email || '';
-    if (email.length > 0) {
-      const namePart = email.split('@')[0];
-      if (namePart.length > 1) {
-        return namePart.substring(0, 2).toUpperCase();
-      }
-      return email.substring(0, 2).toUpperCase();
-    }
-    
-    return 'U';
-  }
 
   // Neural network methods (similar to home page)
   initNeuralNetwork(): void {

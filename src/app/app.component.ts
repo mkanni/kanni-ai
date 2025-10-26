@@ -406,46 +406,5 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  async logout(): Promise<void> {
-    console.log('Logging out...');
-    try {
-      const { error } = await this.supabaseService.signOut();
-      if (!error) {
-        console.log('Logout successful, navigating to login');
-        this.currentUser = null;
-        this.username = '';
-        this.router.navigate(['/login']);
-      } else {
-        console.error('Error logging out:', error);
-        alert('Failed to logout. Please try again.');
-      }
-    } catch (error) {
-      console.error('Exception during logout:', error);
-      alert('Failed to logout. Please try again.');
-    }
-  }
 
-  getUserInitials(): string {
-    if (!this.currentUser) return '??';
-    
-    if (this.username && this.username !== 'Guest') {
-      const parts = this.username.trim().split(' ').filter(p => p.length > 0);
-      if (parts.length > 1) {
-        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-      }
-      return this.username.substring(0, 2).toUpperCase();
-    }
-    
-    // Fallback to email
-    const email = this.currentUser.email || '';
-    if (email.length > 0) {
-      const namePart = email.split('@')[0];
-      if (namePart.length > 1) {
-        return namePart.substring(0, 2).toUpperCase();
-      }
-      return email.substring(0, 2).toUpperCase();
-    }
-    
-    return 'U';
-  }
 }

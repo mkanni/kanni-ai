@@ -1,9 +1,10 @@
-apiVersion: opentelemetry.io/v1alpha1
+apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
   name: otel-collector
   namespace: kanni-ai
 spec:
+  image: otel/opentelemetry-collector-contrib:latest
   env:
     - name: GRAFANA_PROMETHEUS_TOKEN
       valueFrom:
@@ -33,7 +34,7 @@ spec:
               scrape_interval: 30s
 
     processors:
-      batch:
+      batch: {}
       resource:
         attributes:
           - key: service.name

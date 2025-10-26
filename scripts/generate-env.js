@@ -15,6 +15,11 @@ const envConfig = {
   SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY || ''
 };
 
+console.log('Debug: All process.env variables:');
+Object.keys(process.env).filter(key => key.includes('SUPA') || key.includes('INTER')).forEach(key => {
+  console.log(`${key}:`, process.env[key] ? 'SET' : 'MISSING');
+});
+
 console.log('Environment variables loaded:');
 console.log('INTERESTS:', envConfig.INTERESTS ? 'SET' : 'MISSING');
 console.log('SUPABASE_URL:', envConfig.SUPABASE_URL ? 'SET' : 'MISSING');

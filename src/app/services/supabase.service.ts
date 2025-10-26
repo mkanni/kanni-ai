@@ -14,6 +14,15 @@ export class SupabaseService {
 
   constructor(private http: HttpClient) {}
 
+  private getBaseUrl(): string {
+    // Check if we're running in production
+    if (window.location.hostname === 'kanni-ai.de') {
+      return 'https://kanni-ai.de';
+    }
+    // Default to localhost for development
+    return 'http://localhost:4200';
+  }
+
   async initialize(): Promise<void> {
     if (this.initialized) return;
 
@@ -99,10 +108,17 @@ export class SupabaseService {
       return { error: { message: 'Supabase client not initialized' } as AuthError };
     }
     
+    const redirectUrl = `${this.getBaseUrl()}/home`;
+    console.log('Google OAuth redirect URL:', redirectUrl);
+    
     const { error } = await this.supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/home`
+        redirectTo: redirectUrl,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        }
       }
     });
     return { error };
@@ -114,10 +130,14 @@ export class SupabaseService {
       return { error: { message: 'Supabase client not initialized' } as AuthError };
     }
     
+    const redirectUrl = `${this.getBaseUrl()}/home`;
+    console.log('GitHub OAuth redirect URL:', redirectUrl);
+    
     const { error } = await this.supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: `${window.location.origin}/home`
+        redirectTo: redirectUrl,
+        scopes: 'read:user user:email'
       }
     });
     return { error };
@@ -132,8 +152,10 @@ export class SupabaseService {
   }
 
   async resetPassword(email: string): Promise<{ error: AuthError | null }> {
+    const redirectUrl = `${this.getBaseUrl()}/reset-password`;
+    
     const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`
+      redirectTo: redirectUrl
     });
     return { error };
   }
@@ -150,5 +172,98 @@ export class SupabaseService {
 
   getClient(): SupabaseClient {
     return this.supabase;
+  }
+
+  // Interest management methods
+  async getUserInterests(): Promise<{ id: string; name: string; created_at: string }[]> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized');
+    }
+
+    const { data, error } = await this.supabase
+      .from('user_interests')
+      .select('id, name, created_at')
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching user interests:', error);
+      throw error;
+    }
+
+    return data || [];
+  }
+
+  async addUserInterest(interestName: string): Promise<{ id: string; name: string; created_at: string }> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized');
+    }
+
+    if (!this.currentUser.value) {
+      throw new Error('User not authenticated');
+    }
+
+    const { data, error } = await this.supabase
+      .from('user_interests')
+      .insert([
+        {
+          user_id: this.currentUser.value.id,
+          name: interestName.trim()
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding user interest:', error);
+      throw error;
+    }
+
+    return data;
+  }
+
+  async removeUserInterest(interestName: string): Promise<void> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized');
+    }
+
+    if (!this.currentUser.value) {
+      throw new Error('User not authenticated');
+    }
+
+    const { error } = await this.supabase
+      .from('user_interests')
+      .delete()
+      .eq('user_id', this.currentUser.value.id)
+      .eq('name', interestName);
+
+    if (error) {
+      console.error('Error removing user interest:', error);
+      throw error;
+    }
+  }
+
+  async updateUserInterest(oldName: string, newName: string): Promise<{ id: string; name: string; created_at: string }> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized');
+    }
+
+    if (!this.currentUser.value) {
+      throw new Error('User not authenticated');
+    }
+
+    const { data, error } = await this.supabase
+      .from('user_interests')
+      .update({ name: newName.trim() })
+      .eq('user_id', this.currentUser.value.id)
+      .eq('name', oldName)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating user interest:', error);
+      throw error;
+    }
+
+    return data;
   }
 }

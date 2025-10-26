@@ -51,7 +51,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     // Subscribe to current user
-    this.supabaseService.user$.subscribe(user => {
+    this.supabaseService.user$.subscribe(async user => {
       console.log('User state changed:', user);
       this.currentUser = user;
       if (user) {
@@ -61,12 +61,11 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
         this.username = this.capitalizeFirstLetter(user.user_metadata?.['full_name'] || user.user_metadata?.['name'] || emailName);
         console.log('Username set to:', this.username);
         console.log('User email:', user.email);
+        
+        // Load user interests from database
+        await this.loadUserInterests();
       }
     });
-    
-    if (window.env) {
-      this.interests = window.env.INTERESTS ? window.env.INTERESTS.split(',').map((i: string) => i.trim()) : [];
-    }
     
     // Set messages after we potentially have username
     setTimeout(() => {
@@ -77,6 +76,27 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       ];
       this.startTypewriter();
     }, 100);
+  }
+
+  async loadUserInterests(): Promise<void> {
+    if (!this.currentUser) return;
+
+    try {
+      const userInterests = await this.supabaseService.getUserInterests();
+      this.interests = userInterests.map((interest: { id: string; name: string; created_at: string }) => interest.name);
+      console.log('Loaded user interests:', this.interests);
+      
+      // Re-initialize neural network with new interests
+      if (this.interests.length > 0) {
+        setTimeout(() => {
+          this.initNeuralNetwork();
+        }, 100);
+      }
+    } catch (error) {
+      console.error('Error loading user interests:', error);
+      // If database fails, keep empty array - user can add interests via UI
+      this.interests = [];
+    }
   }
   
   capitalizeFirstLetter(str: string): string {
@@ -354,7 +374,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   generateTip(): void {
     if (this.interests.length === 0) {
-      this.generatedTip = 'Please add your interests in the .env file';
+      this.generatedTip = 'Please add your interests by clicking on the "Interests" menu item above';
       return;
     }
 

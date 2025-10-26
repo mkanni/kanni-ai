@@ -1,0 +1,102 @@
+<div class="interests-container">
+  <header class="header">
+    <div class="logo-section">
+      <div class="logo">Kanni Ai</div>
+      <div class="tagline">AI Learning Assistant</div>
+    </div>
+    <nav class="nav-menu">
+      <a routerLink="/interests" class="nav-item">Interests</a>
+      <a href="#pricing" class="nav-item">Pricing</a>
+      <a href="#about" class="nav-item">About</a>
+      <div class="user-menu">
+        <button class="user-avatar" [matMenuTriggerFor]="userMenu">
+          {{ getUserInitials() }}
+        </button>
+        <mat-menu #userMenu="matMenu" xPosition="before">
+          <div class="user-info" *ngIf="currentUser">
+            <div class="user-name">{{ username || 'User' }}</div>
+            <div class="user-email">{{ currentUser.email || 'No email' }}</div>
+          </div>
+          <div class="user-info" *ngIf="!currentUser">
+            <div class="user-name">Loading...</div>
+          </div>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()">
+            <span>Logout</span>
+          </button>
+        </mat-menu>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Neural Network Background -->
+  <canvas #networkCanvas class="network-canvas"></canvas>
+
+  <div class="content">
+    <div class="interests-section">
+      <div class="interests-card">
+        <div class="card-header">
+          <h1>Your Learning Interests</h1>
+          <p>Add topics you want to learn about</p>
+        </div>
+        
+        <div class="card-content">
+          <!-- Add new interest -->
+          <div class="add-interest-section">
+            <div class="input-group">
+              <input 
+                type="text" 
+                [(ngModel)]="newInterest" 
+                placeholder="Enter a new interest..."
+                (keyup.enter)="addInterest()"
+                [disabled]="isSaving"
+                class="interest-input">
+              <button 
+                mat-raised-button 
+                color="primary" 
+                (click)="addInterest()" 
+                [disabled]="!newInterest.trim() || isSaving"
+                class="add-button">
+                <span *ngIf="!isSaving">Add Interest</span>
+                <span *ngIf="isSaving">Adding...</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading state -->
+          <div class="loading-state" *ngIf="isLoading">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Loading your interests...</p>
+          </div>
+
+          <!-- Interests list -->
+          <div class="interests-list" *ngIf="!isLoading">
+            <h3 *ngIf="interests.length === 0" class="no-interests">
+              No interests added yet. Add your first interest above!
+            </h3>
+            
+            <div class="interest-chips" *ngIf="interests.length > 0">
+              <mat-chip-listbox>
+                <mat-chip-option 
+                  *ngFor="let interest of interests" 
+                  class="interest-chip"
+                  [disabled]="isSaving">
+                  {{ interest }}
+                  <button 
+                    mat-icon-button 
+                    (click)="removeInterest(interest)"
+                    [disabled]="isSaving"
+                    class="remove-button">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </mat-chip-option>
+              </mat-chip-listbox>
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+</div>

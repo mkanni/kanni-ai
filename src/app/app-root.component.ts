@@ -24,10 +24,18 @@ export class AppRootComponent implements OnInit {
       const publicRoutes = ['/login', '/health'];
       const isPublicRoute = publicRoutes.includes(this.router.url);
       
+      // Handle OAuth callback - check for auth state change
+      this.supabaseService.user$.subscribe(user => {
+        if (user && (this.router.url === '/login' || this.router.url === '/')) {
+          console.log('User authenticated, redirecting to home');
+          this.router.navigate(['/home']);
+        }
+      });
+      
       // Only redirect if we're not already on a public route
       if (!session && !isPublicRoute) {
         this.router.navigate(['/login']);
-      } else if (session && this.router.url === '/login') {
+      } else if (session && (this.router.url === '/login' || this.router.url === '/')) {
         this.router.navigate(['/home']);
       }
     } catch (error) {

@@ -97,14 +97,17 @@ export class LoginComponent implements OnInit {
     this.loading = true;
 
     try {
+      console.log('Initiating Google OAuth...');
       const { error } = await this.supabaseService.signInWithGoogle();
       if (error) {
-        this.errorMessage = error.message;
+        console.error('Google OAuth error:', error);
+        this.errorMessage = `Google sign-in failed: ${error.message}`;
         this.loading = false;
       }
       // Loading will be cleared after redirect
     } catch (error: any) {
-      this.errorMessage = error.message || 'An error occurred';
+      console.error('Google OAuth exception:', error);
+      this.errorMessage = error.message || 'An error occurred during Google sign-in';
       this.loading = false;
     }
   }
@@ -114,14 +117,17 @@ export class LoginComponent implements OnInit {
     this.loading = true;
 
     try {
+      console.log('Initiating GitHub OAuth...');
       const { error } = await this.supabaseService.signInWithGithub();
       if (error) {
-        this.errorMessage = error.message;
+        console.error('GitHub OAuth error:', error);
+        this.errorMessage = `GitHub sign-in failed: ${error.message}`;
         this.loading = false;
       }
       // Loading will be cleared after redirect
     } catch (error: any) {
-      this.errorMessage = error.message || 'An error occurred';
+      console.error('GitHub OAuth exception:', error);
+      this.errorMessage = error.message || 'An error occurred during GitHub sign-in';
       this.loading = false;
     }
   }

@@ -12,18 +12,23 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 import { AppRootComponent } from './app-root.component';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
 import { HealthComponent } from './health/health.component';
+import { InterestsComponent } from './interests/interests.component';
 import { OpenaiService } from './services/openai.service';
 import { SupabaseService } from './services/supabase.service';
+import { MigrationService } from './services/migration.service';
 import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'home', component: AppComponent, canActivate: [AuthGuard] },
+  { path: 'interests', component: InterestsComponent, canActivate: [AuthGuard] },
   { path: 'health', component: HealthComponent },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', redirectTo: '/login' }
@@ -38,7 +43,8 @@ function initializeApp(supabaseService: SupabaseService) {
     AppRootComponent,
     AppComponent,
     LoginComponent,
-    HealthComponent
+    HealthComponent,
+    InterestsComponent
   ],
   imports: [
     BrowserModule,
@@ -52,11 +58,14 @@ function initializeApp(supabaseService: SupabaseService) {
     MatProgressSpinnerModule,
     MatMenuModule,
     MatIconModule,
-    MatDividerModule
+    MatDividerModule,
+    MatInputModule,
+    MatFormFieldModule
   ],
   providers: [
     OpenaiService, 
     SupabaseService, 
+    MigrationService,
     AuthGuard,
     {
       provide: APP_INITIALIZER,

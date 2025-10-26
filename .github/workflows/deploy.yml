@@ -41,7 +41,7 @@ jobs:
         INTERESTS: ${{ secrets.INTERESTS }}
         SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        run: npm run build
+      run: npm run build
 
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2

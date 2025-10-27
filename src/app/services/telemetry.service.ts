@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { metrics } from '@opentelemetry/api';
 import { logs, SeverityNumber } from '@opentelemetry/api-logs';
+import { MetricsService } from './metrics.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ export class TelemetryService {
   private logger = logs.getLogger('kanni-ai-frontend');
   private initialized = false;
 
-  constructor() {
+  constructor(private metricsService: MetricsService) {
     this.initializeOpenTelemetry();
   }
 
@@ -31,6 +32,7 @@ export class TelemetryService {
   }
 
   recordPageView(pageName: string) {
+    this.metricsService.recordPageView(pageName);
     this.logInfo('Page view', {
       'page.name': pageName,
       'page.url': window.location.href,
@@ -75,6 +77,7 @@ export class TelemetryService {
     const userEmail = user?.email || 'anonymous';
     const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || userEmail.split('@')[0] || 'unknown';
     
+    this.metricsService.recordUserLogin();
     this.logInfo('User logged in successfully', {
       'user.id': user?.id || 'anonymous',
       'user.email': userEmail,
@@ -89,6 +92,7 @@ export class TelemetryService {
     const userEmail = user?.email || 'anonymous';
     const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || userEmail.split('@')[0] || 'unknown';
     
+    this.metricsService.recordUserLogout();
     this.logInfo('User logged out', {
       'user.id': user?.id || 'anonymous',
       'user.email': userEmail,
@@ -102,6 +106,7 @@ export class TelemetryService {
     const userEmail = user?.email || 'anonymous';
     const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || userEmail.split('@')[0] || 'unknown';
     
+    this.metricsService.recordInterestCreated();
     this.logInfo('Interest created', {
       'user.id': user?.id || 'anonymous',
       'user.email': userEmail,
@@ -117,6 +122,7 @@ export class TelemetryService {
     const userEmail = user?.email || 'anonymous';
     const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || userEmail.split('@')[0] || 'unknown';
     
+    this.metricsService.recordInterestDeleted();
     this.logInfo('Interest deleted', {
       'user.id': user?.id || 'anonymous',
       'user.email': userEmail,
@@ -131,6 +137,7 @@ export class TelemetryService {
     const userEmail = user?.email || 'anonymous';
     const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || userEmail.split('@')[0] || 'unknown';
     
+    this.metricsService.recordTipGenerated();
     this.logInfo('Tip generated successfully', {
       'user.id': user?.id || 'anonymous',
       'user.email': userEmail,
@@ -143,6 +150,7 @@ export class TelemetryService {
   }
 
   logError500(error: Error, context?: string) {
+    this.metricsService.recordError('500');
     this.logError(`Application error in ${context || 'unknown context'}`, error, {
       'error.type': '500',
       'error.context': context || 'unknown',

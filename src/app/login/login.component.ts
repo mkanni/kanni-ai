@@ -24,6 +24,9 @@ export class LoginComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
+    // Record page view
+    this.telemetryService.recordPageView('login');
+    
     await this.supabaseService.initialize();
     
     // Check if user is already logged in

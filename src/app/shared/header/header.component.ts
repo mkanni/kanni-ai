@@ -41,6 +41,7 @@ export class HeaderComponent implements OnInit {
     try {
       this.telemetryService.logInfo('User initiated logout', {
         'user.id': this.currentUser?.id || 'unknown',
+        'user.email': this.currentUser?.email || 'unknown',
         'auth.action': 'logout_initiated'
       });
       
@@ -50,6 +51,7 @@ export class HeaderComponent implements OnInit {
       console.error('Error logging out:', error);
       this.telemetryService.logError('Logout process failed', error as Error, {
         'user.id': this.currentUser?.id || 'unknown',
+        'user.email': this.currentUser?.email || 'unknown',
         'auth.action': 'logout_failed'
       });
     }

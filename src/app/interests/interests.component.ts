@@ -98,7 +98,7 @@ export class InterestsComponent implements OnInit, OnDestroy, AfterViewInit {
     try {
       await this.supabaseService.addUserInterest(interest);
       this.interests.push(interest);
-      this.telemetryService.logInterestCreated({ name: interest, id: 'new' }, this.currentUser?.id);
+      this.telemetryService.logInterestCreated({ name: interest, id: 'new' }, this.currentUser);
       this.newInterest = '';
       
       // Refresh neural network with new interest
@@ -109,7 +109,8 @@ export class InterestsComponent implements OnInit, OnDestroy, AfterViewInit {
       console.error('Error adding interest:', error);
       this.telemetryService.logError('Failed to add interest', error as Error, {
         'interest.name': interest,
-        'user.id': this.currentUser?.id || 'unknown'
+        'user.id': this.currentUser?.id || 'unknown',
+        'user.email': this.currentUser?.email || 'unknown'
       });
       alert('Failed to add interest. Please try again.');
     } finally {
@@ -124,7 +125,7 @@ export class InterestsComponent implements OnInit, OnDestroy, AfterViewInit {
     try {
       await this.supabaseService.removeUserInterest(interest);
       this.interests = this.interests.filter(i => i !== interest);
-      this.telemetryService.logInterestDeleted(interest, this.currentUser?.id);
+      this.telemetryService.logInterestDeleted(interest, this.currentUser);
       
       // Refresh neural network after removing interest
       setTimeout(() => {
@@ -134,7 +135,8 @@ export class InterestsComponent implements OnInit, OnDestroy, AfterViewInit {
       console.error('Error removing interest:', error);
       this.telemetryService.logError('Failed to remove interest', error as Error, {
         'interest.name': interest,
-        'user.id': this.currentUser?.id || 'unknown'
+        'user.id': this.currentUser?.id || 'unknown',
+        'user.email': this.currentUser?.email || 'unknown'
       });
       alert('Failed to remove interest. Please try again.');
     } finally {

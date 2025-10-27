@@ -152,10 +152,11 @@ export class SupabaseService {
     const { error } = await this.supabase.auth.signOut();
     if (!error) {
       this.currentUser.next(null);
-      this.telemetryService.logUserLogout(currentUser?.id);
+      this.telemetryService.logUserLogout(currentUser);
     } else {
       this.telemetryService.logError('User logout failed', error, {
         'user.id': currentUser?.id || 'unknown',
+        'user.email': currentUser?.email || 'unknown',
         'auth.action': 'signout'
       });
     }

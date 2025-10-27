@@ -105,7 +105,7 @@ export class LoginComponent implements OnInit {
           });
         } else {
           console.log('Login successful, navigating to home');
-          this.telemetryService.logUserLogin(user?.id, 'email');
+          this.telemetryService.logUserLogin(user, 'email');
           this.router.navigate(['/home']);
         }
       }

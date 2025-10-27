@@ -396,7 +396,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
           this.telemetryService.logTipGenerated(
             this.selectedInterests.join(',') || 'general',
             this.generatedTip,
-            this.currentUser?.id
+            this.currentUser
           );
           
           console.log('Tip generated:', {
@@ -409,6 +409,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
         this.isLoading = false;
         this.telemetryService.logError('Tip generation failed', error, {
           'user.id': this.currentUser?.id || 'unknown',
+          'user.email': this.currentUser?.email || 'unknown',
           'interests.count': this.interests.length,
           'interests.list': this.interests.join(',')
         });

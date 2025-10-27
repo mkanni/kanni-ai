@@ -71,26 +71,41 @@ export class TelemetryService {
   }
 
   // Specific logging methods for user activities
-  logUserLogin(userId?: string, method?: string) {
+  logUserLogin(user?: any, method?: string) {
+    const userEmail = user?.email || 'anonymous';
+    const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || userEmail.split('@')[0] || 'unknown';
+    
     this.logInfo('User logged in successfully', {
-      'user.id': userId || 'anonymous',
+      'user.id': user?.id || 'anonymous',
+      'user.email': userEmail,
+      'user.name': userName,
       'auth.method': method || 'supabase',
       'event.type': 'user_login',
       'timestamp': new Date().toISOString()
     });
   }
 
-  logUserLogout(userId?: string) {
+  logUserLogout(user?: any) {
+    const userEmail = user?.email || 'anonymous';
+    const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || userEmail.split('@')[0] || 'unknown';
+    
     this.logInfo('User logged out', {
-      'user.id': userId || 'anonymous',
+      'user.id': user?.id || 'anonymous',
+      'user.email': userEmail,
+      'user.name': userName,
       'event.type': 'user_logout',
       'timestamp': new Date().toISOString()
     });
   }
 
-  logInterestCreated(interest: any, userId?: string) {
+  logInterestCreated(interest: any, user?: any) {
+    const userEmail = user?.email || 'anonymous';
+    const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || userEmail.split('@')[0] || 'unknown';
+    
     this.logInfo('Interest created', {
-      'user.id': userId || 'anonymous',
+      'user.id': user?.id || 'anonymous',
+      'user.email': userEmail,
+      'user.name': userName,
       'interest.name': interest.name || 'unknown',
       'interest.id': interest.id || 'unknown',
       'event.type': 'interest_created',
@@ -98,18 +113,28 @@ export class TelemetryService {
     });
   }
 
-  logInterestDeleted(interestId: string, userId?: string) {
+  logInterestDeleted(interestId: string, user?: any) {
+    const userEmail = user?.email || 'anonymous';
+    const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || userEmail.split('@')[0] || 'unknown';
+    
     this.logInfo('Interest deleted', {
-      'user.id': userId || 'anonymous',
+      'user.id': user?.id || 'anonymous',
+      'user.email': userEmail,
+      'user.name': userName,
       'interest.id': interestId,
       'event.type': 'interest_deleted',
       'timestamp': new Date().toISOString()
     });
   }
 
-  logTipGenerated(interestId: string, tipContent: string, userId?: string) {
+  logTipGenerated(interestId: string, tipContent: string, user?: any) {
+    const userEmail = user?.email || 'anonymous';
+    const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || userEmail.split('@')[0] || 'unknown';
+    
     this.logInfo('Tip generated successfully', {
-      'user.id': userId || 'anonymous',
+      'user.id': user?.id || 'anonymous',
+      'user.email': userEmail,
+      'user.name': userName,
       'interest.id': interestId,
       'tip.length': tipContent.length,
       'event.type': 'tip_generated',

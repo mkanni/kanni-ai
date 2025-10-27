@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { TelemetryService } from './telemetry.service';
+import { MetricsService } from './metrics.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class SupabaseService {
 
   constructor(
     private http: HttpClient,
-    private telemetryService: TelemetryService
+    private telemetryService: TelemetryService,
+    private metricsService: MetricsService
   ) {}
 
   private getBaseUrl(): string {

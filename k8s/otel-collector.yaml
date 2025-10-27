@@ -41,12 +41,14 @@ spec:
               static_configs:
                 - targets: ['nginx-prometheus-exporter-service:9113']
               metrics_path: '/metrics'
-              scrape_interval: 60s
+              scrape_interval: 30s
+              scrape_timeout: 10s
             - job_name: 'kanni-ai-app'
               static_configs:
                 - targets: ['kanni-ai-service:80']
               metrics_path: '/app-metrics'
-              scrape_interval: 60s
+              scrape_interval: 30s
+              scrape_timeout: 10s
       # Minimal log collection - only OTLP logs from instrumented applications
 
     processors:

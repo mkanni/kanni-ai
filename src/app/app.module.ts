@@ -1,7 +1,7 @@
 import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
@@ -25,6 +25,7 @@ import { HeaderComponent } from './shared/header/header.component';
 import { OpenaiService } from './services/openai.service';
 import { SupabaseService } from './services/supabase.service';
 import { MigrationService } from './services/migration.service';
+import { MetricsHttpInterceptor } from './services/metrics-http-interceptor.service';
 import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
@@ -72,6 +73,11 @@ function initializeApp(supabaseService: SupabaseService) {
     SupabaseService, 
     MigrationService,
     AuthGuard,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: MetricsHttpInterceptor,
+      multi: true
+    },
     {
       provide: APP_INITIALIZER,
       useFactory: initializeApp,

@@ -45,17 +45,64 @@ export class MetricsService {
     this.histograms.set(metricName, history);
   }
 
+  // HTTP-related metrics
+  recordHttpRequest(method: string, endpoint: string, statusCode: number, duration: number) {
+    // Record HTTP request count
+    this.incrementCounter('http_requests_total', 1, { 
+      method: method.toUpperCase(), 
+      endpoint: this.normalizeEndpoint(endpoint),
+      status_code: statusCode.toString(),
+      status_class: Math.floor(statusCode / 100) + 'xx'
+    });
+
+    // Record response time
+    this.recordHistogram('http_request_duration_ms', duration, { 
+      method: method.toUpperCase(),
+      endpoint: this.normalizeEndpoint(endpoint)
+    });
+
+    // Record error rates
+    if (statusCode >= 400) {
+      this.incrementCounter('http_errors_total', 1, { 
+        method: method.toUpperCase(),
+        endpoint: this.normalizeEndpoint(endpoint),
+        status_code: statusCode.toString()
+      });
+    }
+
+    // Update active sessions gauge
+    this.setGauge('http_active_sessions', 1);
+  }
+
+  recordSupabaseLatency(operation: string, duration: number, success: boolean) {
+    this.recordHistogram('supabase_request_duration_ms', duration, { 
+      operation: operation,
+      success: success.toString()
+    });
+    
+    if (!success) {
+      this.incrementCounter('supabase_errors_total', 1, { operation: operation });
+    }
+  }
+
+  recordSupabaseConnection(connected: boolean) {
+    this.setGauge('supabase_connected', connected ? 1 : 0);
+  }
+
   // Business metric methods
   recordPageView(pageName: string) {
     this.incrementCounter('page_views_total', 1, { page: pageName });
+    this.recordHttpRequest('GET', `/${pageName}`, 200, 0); // Simulate HTTP request for page view
   }
 
   recordUserLogin() {
     this.incrementCounter('user_logins_total');
+    this.incrementCounter('active_users', 1);
   }
 
   recordUserLogout() {
     this.incrementCounter('user_logouts_total');
+    this.incrementCounter('active_users', -1);
   }
 
   recordInterestCreated() {
@@ -76,6 +123,15 @@ export class MetricsService {
 
   recordResponseTime(endpoint: string, duration: number) {
     this.recordHistogram('http_request_duration_ms', duration, { endpoint });
+  }
+
+  private normalizeEndpoint(endpoint: string): string {
+    // Normalize endpoints to remove IDs and make them consistent
+    return endpoint
+      .replace(/\/\d+/g, '/:id')
+      .replace(/\/[a-f0-9-]{36}/g, '/:uuid')
+      .replace(/\?.*$/, '')
+      .toLowerCase();
   }
 
   // Export metrics in Prometheus format

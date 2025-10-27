@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { SupabaseService } from '../services/supabase.service';
+import { TelemetryService } from '../services/telemetry.service';
 import { User } from '@supabase/supabase-js';
 
 interface Node {
@@ -34,7 +35,8 @@ export class InterestsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   constructor(
     private supabaseService: SupabaseService,
-    private router: Router
+    private router: Router,
+    private telemetryService: TelemetryService
   ) {}
 
   ngOnInit(): void {
@@ -96,6 +98,7 @@ export class InterestsComponent implements OnInit, OnDestroy, AfterViewInit {
     try {
       await this.supabaseService.addUserInterest(interest);
       this.interests.push(interest);
+      this.telemetryService.logInterestCreated({ name: interest, id: 'new' }, this.currentUser?.id);
       this.newInterest = '';
       
       // Refresh neural network with new interest
@@ -104,6 +107,10 @@ export class InterestsComponent implements OnInit, OnDestroy, AfterViewInit {
       }, 100);
     } catch (error) {
       console.error('Error adding interest:', error);
+      this.telemetryService.logError('Failed to add interest', error as Error, {
+        'interest.name': interest,
+        'user.id': this.currentUser?.id || 'unknown'
+      });
       alert('Failed to add interest. Please try again.');
     } finally {
       this.isSaving = false;
@@ -117,6 +124,7 @@ export class InterestsComponent implements OnInit, OnDestroy, AfterViewInit {
     try {
       await this.supabaseService.removeUserInterest(interest);
       this.interests = this.interests.filter(i => i !== interest);
+      this.telemetryService.logInterestDeleted(interest, this.currentUser?.id);
       
       // Refresh neural network after removing interest
       setTimeout(() => {
@@ -124,6 +132,10 @@ export class InterestsComponent implements OnInit, OnDestroy, AfterViewInit {
       }, 100);
     } catch (error) {
       console.error('Error removing interest:', error);
+      this.telemetryService.logError('Failed to remove interest', error as Error, {
+        'interest.name': interest,
+        'user.id': this.currentUser?.id || 'unknown'
+      });
       alert('Failed to remove interest. Please try again.');
     } finally {
       this.isSaving = false;

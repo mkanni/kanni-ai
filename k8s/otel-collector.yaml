@@ -95,5 +95,5 @@ spec:
           exporters: [prometheusremotewrite, debug]
         logs:
           receivers: [otlp]
-          processors: [batch, resource, filter/logs, probabilistic_sampler/logs]
-          exporters: [otlphttp/logs]
+          processors: [batch, resource]
+          exporters: [otlphttp/logs, debug]

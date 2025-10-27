@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } fr
 import { Router } from '@angular/router';
 import { OpenaiService } from './services/openai.service';
 import { SupabaseService } from './services/supabase.service';
+import { TelemetryService } from './services/telemetry.service';
 import { User } from '@supabase/supabase-js';
 
 interface Node {
@@ -46,7 +47,8 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private openaiService: OpenaiService,
     private supabaseService: SupabaseService,
-    private router: Router
+    private router: Router,
+    private telemetryService: TelemetryService
   ) {}
 
   ngOnInit(): void {
@@ -391,6 +393,12 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
           this.isCohesive = response.isCohesive || false;
           this.selectedInterests = response.selectedInterests || [];
           
+          this.telemetryService.logTipGenerated(
+            this.selectedInterests.join(',') || 'general',
+            this.generatedTip,
+            this.currentUser?.id
+          );
+          
           console.log('Tip generated:', {
             isCohesive: this.isCohesive,
             selectedInterests: this.selectedInterests
@@ -399,6 +407,11 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       },
       error: (error) => {
         this.isLoading = false;
+        this.telemetryService.logError('Tip generation failed', error, {
+          'user.id': this.currentUser?.id || 'unknown',
+          'interests.count': this.interests.length,
+          'interests.list': this.interests.join(',')
+        });
         this.generatedTip = 'Error generating tip. Please check your API key and try again.';
         this.isCohesive = false;
         console.error('Error:', error);

@@ -3,6 +3,7 @@ import { createClient, SupabaseClient, User, Session, AuthError } from '@supabas
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { TelemetryService } from './telemetry.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,10 @@ export class SupabaseService {
   private currentUser = new BehaviorSubject<User | null>(null);
   private initialized = false;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private telemetryService: TelemetryService
+  ) {}
 
   private getBaseUrl(): string {
     // Check if we're running in production
@@ -144,9 +148,16 @@ export class SupabaseService {
   }
 
   async signOut(): Promise<{ error: AuthError | null }> {
+    const currentUser = this.currentUser.value;
     const { error } = await this.supabase.auth.signOut();
     if (!error) {
       this.currentUser.next(null);
+      this.telemetryService.logUserLogout(currentUser?.id);
+    } else {
+      this.telemetryService.logError('User logout failed', error, {
+        'user.id': currentUser?.id || 'unknown',
+        'auth.action': 'signout'
+      });
     }
     return { error };
   }

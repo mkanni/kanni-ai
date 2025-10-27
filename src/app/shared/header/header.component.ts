@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { SupabaseService } from '../../services/supabase.service';
+import { TelemetryService } from '../../services/telemetry.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -13,7 +14,8 @@ export class HeaderComponent implements OnInit {
 
   constructor(
     private supabaseService: SupabaseService,
-    private router: Router
+    private router: Router,
+    private telemetryService: TelemetryService
   ) {}
 
   async ngOnInit() {
@@ -37,10 +39,19 @@ export class HeaderComponent implements OnInit {
 
   async logout() {
     try {
+      this.telemetryService.logInfo('User initiated logout', {
+        'user.id': this.currentUser?.id || 'unknown',
+        'auth.action': 'logout_initiated'
+      });
+      
       await this.supabaseService.signOut();
       this.router.navigate(['/login']);
     } catch (error) {
       console.error('Error logging out:', error);
+      this.telemetryService.logError('Logout process failed', error as Error, {
+        'user.id': this.currentUser?.id || 'unknown',
+        'auth.action': 'logout_failed'
+      });
     }
   }
 }

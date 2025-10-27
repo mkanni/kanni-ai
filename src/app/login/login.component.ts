@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { SupabaseService } from '../services/supabase.service';
+import { TelemetryService } from '../services/telemetry.service';
 
 @Component({
   selector: 'app-login',
@@ -18,7 +19,8 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private supabaseService: SupabaseService,
-    private router: Router
+    private router: Router,
+    private telemetryService: TelemetryService
   ) {}
 
   async ngOnInit() {
@@ -28,6 +30,11 @@ export class LoginComponent implements OnInit {
     const session = await this.supabaseService.getSession();
     if (session) {
       console.log('User already logged in, redirecting to home');
+      this.telemetryService.logInfo('User already authenticated, redirecting', {
+        'user.id': session.user?.id || 'unknown',
+        'auth.type': 'existing_session',
+        'redirect.destination': '/home'
+      });
       this.router.navigate(['/home']);
     }
   }
@@ -66,22 +73,39 @@ export class LoginComponent implements OnInit {
 
     try {
       if (this.isSignUp) {
-        const { error } = await this.supabaseService.signUp(this.email, this.password);
+        const { error, user } = await this.supabaseService.signUp(this.email, this.password);
         if (error) {
           this.errorMessage = error.message;
+          this.telemetryService.logError('User signup failed', error, {
+            'auth.method': 'email',
+            'auth.action': 'signup',
+            'user.email': this.email
+          });
         } else {
           this.successMessage = 'Account created! Please check your email to verify your account.';
+          this.telemetryService.logInfo('User signup successful', {
+            'user.id': user?.id || 'unknown',
+            'user.email': this.email,
+            'auth.method': 'email',
+            'auth.action': 'signup'
+          });
           this.email = '';
           this.password = '';
           this.confirmPassword = '';
         }
       } else {
-        const { error } = await this.supabaseService.signIn(this.email, this.password);
+        const { error, user } = await this.supabaseService.signIn(this.email, this.password);
         if (error) {
           this.errorMessage = error.message;
           console.error('Login error:', error);
+          this.telemetryService.logError('User login failed', error, {
+            'auth.method': 'email',
+            'auth.action': 'signin',
+            'user.email': this.email
+          });
         } else {
           console.log('Login successful, navigating to home');
+          this.telemetryService.logUserLogin(user?.id, 'email');
           this.router.navigate(['/home']);
         }
       }
@@ -102,7 +126,16 @@ export class LoginComponent implements OnInit {
       if (error) {
         console.error('Google OAuth error:', error);
         this.errorMessage = `Google sign-in failed: ${error.message}`;
+        this.telemetryService.logError('Google OAuth login failed', error, {
+          'auth.method': 'google',
+          'auth.action': 'oauth_signin'
+        });
         this.loading = false;
+      } else {
+        this.telemetryService.logInfo('Google OAuth login initiated', {
+          'auth.method': 'google',
+          'auth.action': 'oauth_signin'
+        });
       }
       // Loading will be cleared after redirect
     } catch (error: any) {
@@ -122,7 +155,16 @@ export class LoginComponent implements OnInit {
       if (error) {
         console.error('GitHub OAuth error:', error);
         this.errorMessage = `GitHub sign-in failed: ${error.message}`;
+        this.telemetryService.logError('GitHub OAuth login failed', error, {
+          'auth.method': 'github',
+          'auth.action': 'oauth_signin'
+        });
         this.loading = false;
+      } else {
+        this.telemetryService.logInfo('GitHub OAuth login initiated', {
+          'auth.method': 'github',
+          'auth.action': 'oauth_signin'
+        });
       }
       // Loading will be cleared after redirect
     } catch (error: any) {

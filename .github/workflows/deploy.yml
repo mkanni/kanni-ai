@@ -36,6 +36,9 @@ jobs:
     - name: Run tests
       run: npm run test
 
+    - name: Inject version and commit info
+      run: node scripts/inject-version.js "1.0.0" "${{ github.sha }}"
+
     - name: Build application
       env:
         INTERESTS: ${{ secrets.INTERESTS }}

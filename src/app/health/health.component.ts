@@ -8,7 +8,6 @@ interface HealthResponse {
   timestamp: string;
   duration: number;
   version: string;
-  commit?: string;
   application: {
     status: 'healthy' | 'unhealthy';
     uptime: number;
@@ -54,7 +53,6 @@ export class HealthComponent implements OnInit {
         timestamp: new Date().toISOString(),
         duration: overallDuration,
         version: this.getVersion(),
-        commit: this.getCommitHash(),
         application: {
           status: 'healthy',
           uptime: Date.now() - this.startTime
@@ -78,7 +76,6 @@ export class HealthComponent implements OnInit {
         timestamp: new Date().toISOString(),
         duration: overallDuration,
         version: this.getVersion(),
-        commit: this.getCommitHash(),
         application: {
           status: 'healthy',
           uptime: Date.now() - this.startTime
@@ -100,14 +97,10 @@ export class HealthComponent implements OnInit {
     // Format: "v 1.0.0(d73hf9)" or "v 1.0.0" if no commit
     const version = (window as any).APP_VERSION || '1.0.0';
     const commit = (window as any).APP_COMMIT_HASH;
-    const shortCommit = commit ? commit.substring(0, 6) : null;
+    const shortCommit = commit && commit !== 'unknown' ? commit.substring(0, 6) : null;
     
     return `v ${version}${shortCommit ? `(${shortCommit})` : ''}`;
   }
 
-  private getCommitHash(): string | undefined {
-    // Try to get commit hash from window object
-    const commit = (window as any).APP_COMMIT_HASH;
-    return commit ? commit.substring(0, 6) : undefined;
-  }
+
 }

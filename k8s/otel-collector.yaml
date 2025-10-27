@@ -17,6 +17,16 @@ spec:
           name: grafana-tokens
           key: loki-token
   config:
+    extensions:
+      basicauth/grafana:
+        client_auth:
+          username: "2737163"
+          password: "${GRAFANA_PROMETHEUS_TOKEN}"
+      basicauth/loki:
+        client_auth:
+          username: "1364258"
+          password: "${GRAFANA_LOKI_TOKEN}"
+
     receivers:
       otlp:
         protocols:
@@ -27,32 +37,63 @@ spec:
       prometheus:
         config:
           scrape_configs:
-            - job_name: 'kanni-ai'
+            - job_name: 'kanni-ai-nginx'
               static_configs:
                 - targets: ['kanni-ai-service:80']
               metrics_path: '/metrics'
-              scrape_interval: 30s
+              scrape_interval: 60s
+      # Minimal log collection - only OTLP logs from instrumented applications
 
     processors:
-      batch: {}
+      batch:
+        timeout: 10s
+        send_batch_size: 512
+        send_batch_max_size: 1024
       resource:
         attributes:
           - key: service.name
             value: kanni-ai
             action: upsert
+          - key: deployment.environment
+            value: production
+            action: upsert
+      attributes:
+        actions:
+          - key: job
+            action: delete
+      # Temporary: Allow test logs through (disable filtering for testing)
+      # filter/logs:
+      #   logs:
+      #     log_record:
+      #       - 'IsMatch(body, ".*error.*") or IsMatch(body, ".*Error.*") or IsMatch(body, ".*ERROR.*")'
+      # Log sampling - only send 10% of info/debug logs  
+      probabilistic_sampler/logs:
+        sampling_percentage: 10
 
     exporters:
       prometheusremotewrite:
-        endpoint: "https://prometheus-prod-01-eu-west-0.grafana.net/api/prom/push"
-        headers:
-          authorization: "Bearer ${GRAFANA_PROMETHEUS_TOKEN}"
+        endpoint: "https://prometheus-prod-65-prod-eu-west-2.grafana.net/api/prom/push"
+        auth:
+          authenticator: basicauth/grafana
+        resource_to_telemetry_conversion:
+          enabled: true
+      
+      otlphttp/logs:
+        endpoint: "https://logs-prod-012.grafana.net/otlp"
+        auth:
+          authenticator: basicauth/loki
       
       debug:
         verbosity: detailed
 
     service:
+      extensions: [basicauth/grafana, basicauth/loki]
       pipelines:
         metrics:
           receivers: [otlp, prometheus]
-          processors: [batch, resource]
+          processors: [batch, resource, attributes]
           exporters: [prometheusremotewrite, debug]
+        logs:
+          receivers: [otlp]
+          processors: [batch, resource]
+          exporters: [otlphttp/logs, debug]

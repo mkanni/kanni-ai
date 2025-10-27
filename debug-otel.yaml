@@ -1,7 +1,7 @@
 apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
-  name: otel-collector
+  name: otel-debug
   namespace: kanni-ai
 spec:
   image: otel/opentelemetry-collector-contrib:latest
@@ -19,35 +19,37 @@ spec:
             endpoint: 0.0.0.0:4317
           http:
             endpoint: 0.0.0.0:4318
-      prometheus:
-        config:
-          scrape_configs:
-            - job_name: 'kanni-ai-nginx'
-              static_configs:
-                - targets: ['kanni-ai-service:80']
-              metrics_path: '/metrics'
-              scrape_interval: 30s
 
     processors:
       batch: {}
       resource:
         attributes:
           - key: service.name
-            value: kanni-ai
+            value: kanni-ai-debug
             action: upsert
 
     exporters:
+      # Try different endpoints - comment/uncomment to test
       prometheusremotewrite:
-        endpoint: "https://prometheus-prod-eu-west-2.grafana.net/api/prom/push"
+        # Format 1: Standard format
+        endpoint: "https://prometheus-prod-01-eu-west-2.grafana.net/api/prom/push"
+        # Format 2: With instance ID
+        # endpoint: "https://701064.rw.prometheus-prod-eu-west-2.grafana.net/api/prom/push"
+        # Format 3: Different naming
+        # endpoint: "https://prometheus-blocks-prod-eu-west-2.grafana.net/api/prom/push"
         headers:
           authorization: "Bearer ${GRAFANA_PROMETHEUS_TOKEN}"
       
       debug:
         verbosity: detailed
+      
+      # Test with logging exporter to see what we're trying to send
+      logging:
+        loglevel: debug
 
     service:
       pipelines:
         metrics:
-          receivers: [otlp, prometheus]
+          receivers: [otlp]
           processors: [batch, resource]
-          exporters: [prometheusremotewrite, debug]
+          exporters: [debug, logging]

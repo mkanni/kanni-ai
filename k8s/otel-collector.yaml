@@ -61,11 +61,11 @@ spec:
         actions:
           - key: job
             action: delete
-      # Temporary: Allow test logs through (disable filtering for testing)
-      # filter/logs:
-      #   logs:
-      #     log_record:
-      #       - 'IsMatch(body, ".*error.*") or IsMatch(body, ".*Error.*") or IsMatch(body, ".*ERROR.*")'
+      # Log filtering - only send important logs to avoid rate limiting
+      filter/logs:
+        logs:
+          log_record:
+            - 'IsMatch(body, ".*[Ee]rror.*") or IsMatch(body, ".*[Ww]arn.*") or IsMatch(body, ".*[Ff]ail.*")'
       # Log sampling - only send 10% of info/debug logs  
       probabilistic_sampler/logs:
         sampling_percentage: 10
@@ -95,5 +95,5 @@ spec:
           exporters: [prometheusremotewrite, debug]
         logs:
           receivers: [otlp]
-          processors: [batch, resource]
-          exporters: [otlphttp/logs, debug]
+          processors: [batch, resource, filter/logs, probabilistic_sampler/logs]
+          exporters: [otlphttp/logs]

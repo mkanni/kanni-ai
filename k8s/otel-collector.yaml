@@ -37,12 +37,16 @@ spec:
       prometheus:
         config:
           scrape_configs:
-            - job_name: 'kanni-ai-consolidated'
+            - job_name: 'kanni-ai'
               static_configs:
                 - targets: ['kanni-ai-service:80']
               metrics_path: '/app-metrics'
               scrape_interval: 30s
               scrape_timeout: 10s
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  target_label: service_name
+                  replacement: 'kanni-ai'
               scrape_timeout: 10s
       # Minimal log collection - only OTLP logs from instrumented applications
 

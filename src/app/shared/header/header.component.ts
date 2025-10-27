@@ -39,9 +39,14 @@ export class HeaderComponent implements OnInit {
 
   async logout() {
     try {
+      const userName = this.currentUser?.user_metadata?.full_name || 
+                      this.currentUser?.user_metadata?.name || 
+                      (this.currentUser?.email ? this.currentUser.email.split('@')[0] : 'unknown');
+      
       this.telemetryService.logInfo('User initiated logout', {
         'user.id': this.currentUser?.id || 'unknown',
         'user.email': this.currentUser?.email || 'unknown',
+        'user.name': userName,
         'auth.action': 'logout_initiated'
       });
       

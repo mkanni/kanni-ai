@@ -22,7 +22,7 @@ interface HealthResponse {
 
 @Component({
   selector: 'app-health',
-  template: `{{ healthJson }}`,
+  template: '',
   styles: []
 })
 export class HealthComponent implements OnInit {
@@ -89,15 +89,22 @@ export class HealthComponent implements OnInit {
       };
     }
 
-    // Convert to JSON string for output
-    this.healthJson = JSON.stringify(this.healthData, null, 2);
+    // Return pure JSON by writing to document
+    document.open();
+    document.write(JSON.stringify(this.healthData, null, 2));
+    document.close();
+    
+    // Set content type header
+    if (document.contentType) {
+      (document as any).contentType = 'application/json';
+    }
   }
 
   private getVersion(): string {
-    // Format: "v 1.0.0(d73hf9)" or "v 1.0.0" if no commit
+    // Format: "v 1.0.0(d73hf9a)" or "v 1.0.0" if no commit
     const version = (window as any).APP_VERSION || '1.0.0';
     const commit = (window as any).APP_COMMIT_HASH;
-    const shortCommit = commit && commit !== 'unknown' ? commit.substring(0, 6) : null;
+    const shortCommit = commit && commit !== 'unknown' ? commit.substring(0, 7) : null;
     
     return `v ${version}${shortCommit ? `(${shortCommit})` : ''}`;
   }

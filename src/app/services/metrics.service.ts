@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +11,11 @@ export class MetricsService {
   private histograms = new Map<string, Array<{ value: number; timestamp: number }>>();
 
   constructor() {
+    if (!environment.enableMetrics) {
+      console.log('⚠️  Metrics collection disabled in this environment');
+      return;
+    }
+    
     // Initialize basic metrics
     this.gauges.set('app_start_time', Date.now());
     this.counters.set('page_views_total', 0);
@@ -19,20 +25,28 @@ export class MetricsService {
     this.counters.set('interests_deleted_total', 0);
     this.counters.set('tips_generated_total', 0);
     this.counters.set('errors_total', 0);
+    
+    console.log(`✅ Metrics service initialized for ${environment.production ? 'production' : 'development'}`);
   }
 
   incrementCounter(name: string, value: number = 1, labels?: Record<string, string>) {
+    if (!environment.enableMetrics) return;
+    
     const metricName = this.buildMetricName(name, labels);
     const current = this.counters.get(metricName) || 0;
     this.counters.set(metricName, current + value);
   }
 
   setGauge(name: string, value: number, labels?: Record<string, string>) {
+    if (!environment.enableMetrics) return;
+    
     const metricName = this.buildMetricName(name, labels);
     this.gauges.set(metricName, value);
   }
 
   recordHistogram(name: string, value: number, labels?: Record<string, string>) {
+    if (!environment.enableMetrics) return;
+    
     const metricName = this.buildMetricName(name, labels);
     const history = this.histograms.get(metricName) || [];
     history.push({ value, timestamp: Date.now() });
@@ -144,12 +158,17 @@ export class MetricsService {
 
   // Export metrics in Prometheus format
   exportPrometheusMetrics(): string {
+    if (!environment.enableMetrics) {
+      return '# Metrics collection disabled\n';
+    }
+    
     let output = '';
     
     // Add metadata
+    const envLabel = environment.production ? 'production' : 'development';
     output += '# HELP app_info Application information\n';
     output += '# TYPE app_info gauge\n';
-    output += `app_info{version="1.0.0",service="kanni-ai-frontend"} 1\n\n`;
+    output += `app_info{version="1.0.0",service="kanni-ai-frontend",environment="${envLabel}"} 1\n\n`;
 
     // Export counters
     for (const [name, value] of this.counters.entries()) {

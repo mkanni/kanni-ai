@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { metrics } from '@opentelemetry/api';
 import { logs, SeverityNumber } from '@opentelemetry/api-logs';
 import { MetricsService } from './metrics.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +23,11 @@ export class TelemetryService {
   }
 
   recordMetric(name: string, value: number, attributes?: Record<string, any>) {
-    if (!this.isProduction()) {
+    if (!environment.enableMetrics) {
+      return;
+    }
+    
+    if (!environment.production) {
       console.log(`[METRIC] ${name}: ${value}`, attributes);
       return;
     }
@@ -50,16 +55,24 @@ export class TelemetryService {
 
   // Logging methods for different severity levels
   logInfo(message: string, attributes?: Record<string, any>) {
-    this.sendLog('INFO', message, attributes);
-    console.log(`[INFO] ${message}`, attributes);
+    if (environment.enableLogs) {
+      this.sendLog('INFO', message, attributes);
+      console.log(`[INFO] ${message}`, attributes);
+    }
   }
 
   logWarn(message: string, attributes?: Record<string, any>) {
-    this.sendLog('WARN', message, attributes);
-    console.warn(`[WARN] ${message}`, attributes);
+    if (environment.enableLogs) {
+      this.sendLog('WARN', message, attributes);
+      console.warn(`[WARN] ${message}`, attributes);
+    }
   }
 
   logError(message: string, error?: Error, attributes?: Record<string, any>) {
+    if (!environment.enableLogs) {
+      return;
+    }
+    
     const logAttributes = {
       ...attributes,
       ...(error && {
@@ -181,18 +194,19 @@ export class TelemetryService {
   }
 
   private sendLogViaHTTP(severity: string, message: string, attributes?: Record<string, any>) {
-    // Only send HTTP logs in production
-    if (!this.isProduction()) {
+    // Only send HTTP logs if OTLP is enabled (production)
+    if (!environment.enableOTLP) {
       return;
     }
 
+    const env = this.getEnvironment();
     const logData = {
       resourceLogs: [{
         resource: {
           attributes: [
             { key: 'service.name', value: { stringValue: 'kanni-ai-frontend' } },
             { key: 'service.version', value: { stringValue: '1.0.0' } },
-            { key: 'deployment.environment', value: { stringValue: 'production' } }
+            { key: 'deployment.environment', value: { stringValue: env } }
           ]
         },
         scopeLogs: [{
@@ -227,14 +241,14 @@ export class TelemetryService {
 
 
   private getEnvironment(): string {
-    if (window.location.hostname === 'kanni-ai.de') {
+    if (environment.production) {
       return 'production';
     }
     return 'development';
   }
 
   private isProduction(): boolean {
-    return window.location.hostname === 'kanni-ai.de' || window.location.hostname.includes('kanni-ai');
+    return environment.production;
   }
 
   private ensureInitialized() {
@@ -244,10 +258,16 @@ export class TelemetryService {
       const env = this.getEnvironment();
       console.log(`OpenTelemetry logging initialized for ${env} environment`);
       
-      if (!this.isProduction()) {
-        console.log('⚠️  Logging to OTEL collector disabled in development - logs will only appear in console');
+      if (!environment.enableOTLP) {
+        console.log('⚠️  OTLP logging disabled - logs will only appear in console');
       } else {
-        console.log('✅ Logging to OTEL collector enabled for production');
+        console.log('✅ OTLP logging enabled - sending logs to collector');
+      }
+      
+      if (environment.enableMetrics) {
+        console.log('✅ Metrics collection enabled');
+      } else {
+        console.log('⚠️  Metrics collection disabled');
       }
     }
   }

@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject, Renderer2 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { MetricsService } from '../services/metrics.service';
 import { SupabaseService } from '../services/supabase.service';
 
 @Component({
   selector: 'app-metrics',
-  template: '<pre [innerHTML]="metrics"></pre>',
+  template: '<pre></pre>',
   standalone: false
 })
 export class MetricsComponent implements OnInit {
@@ -12,7 +13,9 @@ export class MetricsComponent implements OnInit {
 
   constructor(
     private metricsService: MetricsService,
-    private supabaseService: SupabaseService
+    private supabaseService: SupabaseService,
+    private renderer: Renderer2,
+    @Inject(DOCUMENT) private document: Document
   ) {}
 
   async ngOnInit() {
@@ -21,6 +24,22 @@ export class MetricsComponent implements OnInit {
     
     // Generate metrics in Prometheus format
     this.metrics = this.metricsService.exportPrometheusMetrics();
+    
+    // Strip HTML and show only metrics text (like /health endpoint)
+    setTimeout(() => {
+      while (this.document.body.firstChild) {
+        this.document.body.removeChild(this.document.body.firstChild);
+      }
+      
+      const pre = this.renderer.createElement('pre');
+      const text = this.renderer.createText(this.metrics);
+      this.renderer.appendChild(pre, text);
+      this.renderer.setStyle(pre, 'font-family', 'monospace');
+      this.renderer.setStyle(pre, 'white-space', 'pre-wrap');
+      this.renderer.setStyle(pre, 'margin', '0');
+      this.renderer.setStyle(pre, 'padding', '0');
+      this.renderer.appendChild(this.document.body, pre);
+    }, 0);
   }
 
   private async generateSampleMetrics() {

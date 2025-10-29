@@ -47,7 +47,6 @@ spec:
                 - source_labels: [__name__]
                   target_label: service_name
                   replacement: 'kanni-ai'
-              scrape_timeout: 10s
       # Minimal log collection - only OTLP logs from instrumented applications
 
     processors:
@@ -63,10 +62,6 @@ spec:
           - key: deployment.environment
             value: production
             action: upsert
-      attributes:
-        actions:
-          - key: job
-            action: delete
       # Log filtering - only send important logs to avoid rate limiting
       filter/logs:
         logs:
@@ -97,7 +92,7 @@ spec:
       pipelines:
         metrics:
           receivers: [otlp, prometheus]
-          processors: [batch, resource, attributes]
+          processors: [batch, resource]
           exporters: [prometheusremotewrite, debug]
         logs:
           receivers: [otlp]

@@ -14,7 +14,7 @@ const versionScript = `
 // Version information injected during GitHub Actions build
 window.APP_VERSION = '${version}';
 window.APP_COMMIT_HASH = '${commit}';
-console.log('Application Version: v${version}' + ('${commit}' !== 'unknown' ? ' (${commit.substring(0, 6)})' : ''));
+console.log('Application Version: v${version}' + ('${commit}' !== 'unknown' ? ' (${commit.substring(0, 7)})' : ''));
 `;
 
 // Write to assets directory

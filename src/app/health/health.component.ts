@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Renderer2, Inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { SupabaseService } from '../services/supabase.service';
 
 interface HealthResponse {
@@ -22,15 +23,29 @@ interface HealthResponse {
 
 @Component({
   selector: 'app-health',
-  template: `{{ healthJson }}`,
-  styles: []
+  template: '<pre>{{ healthJson }}</pre>',
+  styles: [`
+    :host {
+      display: block;
+    }
+    pre {
+      margin: 0;
+      padding: 0;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+  `]
 })
 export class HealthComponent implements OnInit {
   healthData: HealthResponse | null = null;
   healthJson: string = '';
   private startTime = Date.now();
 
-  constructor(private supabaseService: SupabaseService) {}
+  constructor(
+    private supabaseService: SupabaseService,
+    private renderer: Renderer2,
+    @Inject(DOCUMENT) private document: Document
+  ) {}
 
   async ngOnInit() {
     const checkStart = performance.now();
@@ -89,15 +104,34 @@ export class HealthComponent implements OnInit {
       };
     }
 
-    // Convert to JSON string for output
+    // Convert to JSON string
     this.healthJson = JSON.stringify(this.healthData, null, 2);
+    
+    // Remove all HTML scaffolding and show only JSON
+    setTimeout(() => {
+      const body = this.document.body;
+      const appRoot = this.document.querySelector('app-root');
+      const healthComponent = this.document.querySelector('app-health');
+      
+      if (body && healthComponent) {
+        // Clear body and append only the JSON content
+        body.innerHTML = '';
+        const pre = this.renderer.createElement('pre');
+        const text = this.renderer.createText(this.healthJson);
+        this.renderer.appendChild(pre, text);
+        this.renderer.setStyle(pre, 'margin', '0');
+        this.renderer.setStyle(pre, 'padding', '0');
+        this.renderer.setStyle(pre, 'font-family', 'monospace');
+        this.renderer.appendChild(body, pre);
+      }
+    }, 0);
   }
 
   private getVersion(): string {
-    // Format: "v 1.0.0(d73hf9)" or "v 1.0.0" if no commit
+    // Format: "v 1.0.0(d73hf9a)" or "v 1.0.0" if no commit
     const version = (window as any).APP_VERSION || '1.0.0';
     const commit = (window as any).APP_COMMIT_HASH;
-    const shortCommit = commit && commit !== 'unknown' ? commit.substring(0, 6) : null;
+    const shortCommit = commit && commit !== 'unknown' ? commit.substring(0, 7) : null;
     
     return `v ${version}${shortCommit ? `(${shortCommit})` : ''}`;
   }

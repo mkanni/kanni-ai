@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Renderer2, Inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { SupabaseService } from '../services/supabase.service';
 
 interface HealthResponse {
@@ -22,15 +23,29 @@ interface HealthResponse {
 
 @Component({
   selector: 'app-health',
-  template: '',
-  styles: []
+  template: '<pre>{{ healthJson }}</pre>',
+  styles: [`
+    :host {
+      display: block;
+    }
+    pre {
+      margin: 0;
+      padding: 0;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+  `]
 })
 export class HealthComponent implements OnInit {
   healthData: HealthResponse | null = null;
   healthJson: string = '';
   private startTime = Date.now();
 
-  constructor(private supabaseService: SupabaseService) {}
+  constructor(
+    private supabaseService: SupabaseService,
+    private renderer: Renderer2,
+    @Inject(DOCUMENT) private document: Document
+  ) {}
 
   async ngOnInit() {
     const checkStart = performance.now();
@@ -89,15 +104,27 @@ export class HealthComponent implements OnInit {
       };
     }
 
-    // Return pure JSON by writing to document
-    document.open();
-    document.write(JSON.stringify(this.healthData, null, 2));
-    document.close();
+    // Convert to JSON string
+    this.healthJson = JSON.stringify(this.healthData, null, 2);
     
-    // Set content type header
-    if (document.contentType) {
-      (document as any).contentType = 'application/json';
-    }
+    // Remove all HTML scaffolding and show only JSON
+    setTimeout(() => {
+      const body = this.document.body;
+      const appRoot = this.document.querySelector('app-root');
+      const healthComponent = this.document.querySelector('app-health');
+      
+      if (body && healthComponent) {
+        // Clear body and append only the JSON content
+        body.innerHTML = '';
+        const pre = this.renderer.createElement('pre');
+        const text = this.renderer.createText(this.healthJson);
+        this.renderer.appendChild(pre, text);
+        this.renderer.setStyle(pre, 'margin', '0');
+        this.renderer.setStyle(pre, 'padding', '0');
+        this.renderer.setStyle(pre, 'font-family', 'monospace');
+        this.renderer.appendChild(body, pre);
+      }
+    }, 0);
   }
 
   private getVersion(): string {

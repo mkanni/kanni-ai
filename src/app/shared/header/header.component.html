@@ -6,8 +6,8 @@
   <nav class="nav-menu">
     <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">Home</a>
     <a routerLink="/interests" routerLinkActive="active" class="nav-item">Interests</a>
+    <a routerLink="/about" routerLinkActive="active" class="nav-item">About</a>
     <a href="#pricing" class="nav-item">Pricing</a>
-    <a href="#about" class="nav-item">About</a>
     <div class="user-menu">
       <button class="user-avatar" [matMenuTriggerFor]="userMenu">
         {{ getUserInitials() }}

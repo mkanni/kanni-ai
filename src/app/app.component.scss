@@ -112,12 +112,12 @@
 }
 
 .tip-card {
-  background: rgba(255, 255, 255, 0.03) !important;
+  background: rgba(15, 20, 25, 0.6) !important;
   backdrop-filter: blur(20px);
-  border-radius: 12px !important;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
   padding: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(102, 126, 234, 0.15);
   position: relative;
   transition: all 0.3s ease;
   width: 100%;

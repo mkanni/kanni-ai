@@ -9,12 +9,16 @@ COPY . .
 ARG SUPABASE_URL=""
 ARG SUPABASE_ANON_KEY=""
 ARG INTERESTS=""
+ARG APP_VERSION="1.0.0"
+ARG APP_COMMIT_HASH="unknown"
 
 # Debug: Show what build args were received
 RUN echo "Build args received:" && \
     echo "SUPABASE_URL: ${SUPABASE_URL}" && \
     echo "SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:+[SET]}" && \
-    echo "INTERESTS: ${INTERESTS:+[SET]}"
+    echo "INTERESTS: ${INTERESTS:+[SET]}" && \
+    echo "APP_VERSION: ${APP_VERSION}" && \
+    echo "APP_COMMIT_HASH: ${APP_COMMIT_HASH}"
 
 # Set environment variables for the build (ensure they're set even if empty)
 ENV SUPABASE_URL=${SUPABASE_URL}
@@ -26,6 +30,9 @@ RUN echo "Environment variables set:" && \
     echo "SUPABASE_URL: ${SUPABASE_URL}" && \
     echo "SUPABASE_ANON_KEY exists: ${SUPABASE_ANON_KEY:+YES}" && \
     echo "INTERESTS exists: ${INTERESTS:+YES}"
+
+# Inject version and commit info before building
+RUN node scripts/inject-version.js "${APP_VERSION}" "${APP_COMMIT_HASH}"
 
 RUN npm run build
 

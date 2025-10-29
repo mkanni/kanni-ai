@@ -36,16 +36,6 @@ jobs:
     - name: Run tests
       run: npm run test
 
-    - name: Inject version and commit info
-      run: node scripts/inject-version.js "1.0.0" "${{ github.sha }}"
-
-    - name: Build application
-      env:
-        INTERESTS: ${{ secrets.INTERESTS }}
-        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-      run: npm run build
-
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
       with:
@@ -79,6 +69,8 @@ jobs:
           --build-arg SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
           --build-arg SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}" \
           --build-arg INTERESTS="${{ secrets.INTERESTS }}" \
+          --build-arg APP_VERSION="1.0.0" \
+          --build-arg APP_COMMIT_HASH="${{ github.sha }}" \
           --tag "gcr.io/${{ secrets.GCP_PROJECT_ID }}/$IMAGE:$GITHUB_SHA" \
           --tag "gcr.io/${{ secrets.GCP_PROJECT_ID }}/$IMAGE:latest" \
           .

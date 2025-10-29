@@ -47,18 +47,26 @@ export class MetricsService {
 
   // HTTP-related metrics
   recordHttpRequest(method: string, endpoint: string, statusCode: number, duration: number) {
-    // Record HTTP request count
+    // Record HTTP request count - using http_server_request_duration_seconds naming for compatibility
+    this.incrementCounter('http_server_request_duration_seconds_count', 1, { 
+      http_method: method.toUpperCase(), 
+      http_route: this.normalizeEndpoint(endpoint),
+      http_status_code: statusCode.toString()
+    });
+
+    // Record response time in seconds (convert from ms)
+    const durationSeconds = duration / 1000;
+    this.recordHistogram('http_server_request_duration_seconds', durationSeconds, { 
+      http_method: method.toUpperCase(),
+      http_route: this.normalizeEndpoint(endpoint),
+      http_status_code: statusCode.toString()
+    });
+
+    // Also keep legacy http_requests_total for backwards compatibility
     this.incrementCounter('http_requests_total', 1, { 
       method: method.toUpperCase(), 
       endpoint: this.normalizeEndpoint(endpoint),
-      status_code: statusCode.toString(),
-      status_class: Math.floor(statusCode / 100) + 'xx'
-    });
-
-    // Record response time
-    this.recordHistogram('http_request_duration_ms', duration, { 
-      method: method.toUpperCase(),
-      endpoint: this.normalizeEndpoint(endpoint)
+      status_code: statusCode.toString()
     });
 
     // Record error rates
@@ -161,28 +169,53 @@ export class MetricsService {
       output += `${cleanName}${labels} ${value}\n\n`;
     }
 
-    // Export histograms (simplified as gauges for now)
+    // Export histograms with proper bucket format
+    const histogramBuckets = [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10];
     for (const [name, values] of this.histograms.entries()) {
       if (values.length === 0) continue;
       
       const cleanName = this.getMetricBaseName(name);
       const labels = this.getMetricLabels(name);
-      const recent = values.slice(-100); // Last 100 values
-      const avg = recent.reduce((sum, v) => sum + v.value, 0) / recent.length;
-      const max = Math.max(...recent.map(v => v.value));
-      const min = Math.min(...recent.map(v => v.value));
       
-      output += `# HELP ${cleanName}_avg Average of ${cleanName.replace(/_/g, ' ')}\n`;
-      output += `# TYPE ${cleanName}_avg gauge\n`;
-      output += `${cleanName}_avg${labels} ${avg.toFixed(2)}\n\n`;
-      
-      output += `# HELP ${cleanName}_max Maximum of ${cleanName.replace(/_/g, ' ')}\n`;
-      output += `# TYPE ${cleanName}_max gauge\n`;
-      output += `${cleanName}_max${labels} ${max}\n\n`;
-      
-      output += `# HELP ${cleanName}_min Minimum of ${cleanName.replace(/_/g, ' ')}\n`;
-      output += `# TYPE ${cleanName}_min gauge\n`;
-      output += `${cleanName}_min${labels} ${min}\n\n`;
+      // For http_server_request_duration_seconds, export as proper histogram
+      if (cleanName === 'http_server_request_duration_seconds') {
+        const labelStr = labels.slice(1, -1); // Remove { and }
+        
+        output += `# HELP ${cleanName} HTTP request duration in seconds\n`;
+        output += `# TYPE ${cleanName} histogram\n`;
+        
+        // Calculate buckets
+        const sortedValues = values.map(v => v.value).sort((a, b) => a - b);
+        for (const bucket of histogramBuckets) {
+          const count = sortedValues.filter(v => v <= bucket).length;
+          output += `${cleanName}_bucket{${labelStr},le="${bucket}"} ${count}\n`;
+        }
+        // +Inf bucket
+        output += `${cleanName}_bucket{${labelStr},le="+Inf"} ${values.length}\n`;
+        
+        // Sum and count
+        const sum = sortedValues.reduce((acc, v) => acc + v, 0);
+        output += `${cleanName}_sum{${labelStr}} ${sum.toFixed(6)}\n`;
+        output += `${cleanName}_count{${labelStr}} ${values.length}\n\n`;
+      } else {
+        // For other histograms, export as simplified gauges
+        const recent = values.slice(-100);
+        const avg = recent.reduce((sum, v) => sum + v.value, 0) / recent.length;
+        const max = Math.max(...recent.map(v => v.value));
+        const min = Math.min(...recent.map(v => v.value));
+        
+        output += `# HELP ${cleanName}_avg Average of ${cleanName.replace(/_/g, ' ')}\n`;
+        output += `# TYPE ${cleanName}_avg gauge\n`;
+        output += `${cleanName}_avg${labels} ${avg.toFixed(2)}\n\n`;
+        
+        output += `# HELP ${cleanName}_max Maximum of ${cleanName.replace(/_/g, ' ')}\n`;
+        output += `# TYPE ${cleanName}_max gauge\n`;
+        output += `${cleanName}_max${labels} ${max}\n\n`;
+        
+        output += `# HELP ${cleanName}_min Minimum of ${cleanName.replace(/_/g, ' ')}\n`;
+        output += `# TYPE ${cleanName}_min gauge\n`;
+        output += `${cleanName}_min${labels} ${min}\n\n`;
+      }
     }
 
     // Add uptime

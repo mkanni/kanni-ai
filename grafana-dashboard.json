@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 0,
+  "id": 22,
   "links": [],
   "panels": [
     {
@@ -78,7 +78,7 @@
             "uid": "grafanacloud-kanni-prom"
           },
           "editorMode": "code",
-          "expr": "sum(rate(http_requests_total[5m])) * 60 or vector(0)",
+          "expr": "rate(nginx_http_requests_total{job=\"nginx-exporter\"}[5m]) * 60 or vector(0)",
           "legendFormat": "Total Requests",
           "range": true,
           "refId": "A"
@@ -173,8 +173,8 @@
             "uid": "grafanacloud-kanni-prom"
           },
           "editorMode": "code",
-          "expr": "sum by (method, endpoint, status_code) (rate(http_requests_total[5m])) or vector(0)",
-          "legendFormat": "{{method}} {{endpoint}} ({{status_code}})",
+          "expr": "sum by (status) (rate(nginx_http_requests_total{job=\"nginx-exporter\"}[5m])) or vector(0)",
+          "legendFormat": "Status {{status}}",
           "range": true,
           "refId": "A"
         }
@@ -271,8 +271,8 @@
             "uid": "grafanacloud-kanni-prom"
           },
           "editorMode": "code",
-          "expr": "http_request_duration_ms_max or vector(0)",
-          "legendFormat": "Max {{endpoint}}",
+          "expr": "histogram_quantile(0.99, rate(nginx_http_request_duration_seconds_bucket{job=\"nginx-exporter\"}[5m])) * 1000 or vector(0)",
+          "legendFormat": "P99",
           "range": true,
           "refId": "A"
         },
@@ -282,9 +282,9 @@
             "uid": "grafanacloud-kanni-prom"
           },
           "editorMode": "code",
-          "expr": "http_request_duration_ms_avg or vector(0)",
+          "expr": "histogram_quantile(0.50, rate(nginx_http_request_duration_seconds_bucket{job=\"nginx-exporter\"}[5m])) * 1000 or vector(0)",
           "hide": false,
-          "legendFormat": "Avg {{endpoint}}",
+          "legendFormat": "P50",
           "range": true,
           "refId": "B"
         }
@@ -424,8 +424,8 @@
             "uid": "grafanacloud-kanni-prom"
           },
           "editorMode": "code",
-          "expr": "sum by (status_code) (rate(http_requests_total[5m])) or vector(0)",
-          "legendFormat": "Status {{status_code}}",
+          "expr": "sum by (status) (rate(nginx_http_requests_total{job=\"nginx-exporter\"}[5m])) or vector(0)",
+          "legendFormat": "Status {{status}}",
           "range": true,
           "refId": "A"
         }
@@ -497,7 +497,7 @@
             "uid": "grafanacloud-kanni-prom"
           },
           "editorMode": "code",
-          "expr": "sum(rate(http_errors_total[5m])) * 60 or vector(0)",
+          "expr": "sum(rate(nginx_http_requests_total{job=\"nginx-exporter\",status=~\"[45].*\"}[5m])) * 60 or vector(0)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -577,11 +577,11 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "grafanacloud-kanni-prom"
+            "type": "loki",
+            "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "supabase_connected or vector(0)",
+          "expr": "count_over_time({service_name=\"kanni-ai\"} | logfmt | event_type=\"user_login\" [5m]) > 0 or vector(1)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -642,17 +642,17 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "grafanacloud-kanni-prom"
+            "type": "loki",
+            "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "active_users or vector(0)",
+          "expr": "count(count_over_time({service_name=\"kanni-ai\"} | logfmt | event_type=\"page_view\" [5m]) by (user_email)) or vector(0)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Active Users",
+      "title": "Active Users (Last 5m)",
       "type": "stat"
     },
     {
@@ -739,22 +739,22 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "grafanacloud-kanni-prom"
+            "type": "loki",
+            "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "increase(user_logins_total[1h]) or vector(0)",
+          "expr": "sum(count_over_time({service_name=\"kanni-ai\"} | logfmt | event_type=\"user_login\" [1h]))",
           "legendFormat": "User Logins",
           "range": true,
           "refId": "A"
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "grafanacloud-kanni-prom"
+            "type": "loki",
+            "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "increase(interests_created_total[1h]) or vector(0)",
+          "expr": "sum(count_over_time({service_name=\"kanni-ai\"} | logfmt | event_type=\"interest_created\" [1h]))",
           "hide": false,
           "legendFormat": "Interests Created",
           "range": true,
@@ -762,11 +762,11 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "grafanacloud-kanni-prom"
+            "type": "loki",
+            "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "increase(tips_generated_total[1h]) or vector(0)",
+          "expr": "sum(count_over_time({service_name=\"kanni-ai\"} | logfmt | event_type=\"tip_generated\" [1h]))",
           "hide": false,
           "legendFormat": "Tips Generated",
           "range": true,
@@ -828,17 +828,17 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "grafanacloud-kanni-prom"
+            "type": "loki",
+            "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "user_logins_total or vector(0)",
+          "expr": "sum(count_over_time({service_name=\"kanni-ai\"} | logfmt | event_type=\"user_login\" [24h]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Total User Logins",
+      "title": "Total User Logins (24h)",
       "type": "stat"
     },
     {
@@ -893,17 +893,17 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "grafanacloud-kanni-prom"
+            "type": "loki",
+            "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "interests_created_total or vector(0)",
+          "expr": "sum(count_over_time({service_name=\"kanni-ai\"} | logfmt | event_type=\"interest_created\" [24h]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Total Interests Created",
+      "title": "Total Interests Created (24h)",
       "type": "stat"
     },
     {
@@ -962,13 +962,13 @@
             "uid": "grafanacloud-kanni-prom"
           },
           "editorMode": "code",
-          "expr": "tips_generated_total or vector(0)",
+          "expr": "sum(count_over_time({service_name=\"kanni-ai\"} | logfmt | event_type=\"tip_generated\" [24h]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Total Tips Generated",
+      "title": "Total Tips Generated (24h)",
       "type": "stat"
     },
     {
@@ -1031,13 +1031,13 @@
             "uid": "grafanacloud-kanni-prom"
           },
           "editorMode": "code",
-          "expr": "errors_total or vector(0)",
+          "expr": "sum(count_over_time({service_name=\"kanni-ai\"} | logfmt | level=\"ERROR\" [24h]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Total Errors",
+      "title": "Total Errors (24h)",
       "type": "stat"
     },
     {
@@ -1129,13 +1129,13 @@
             "uid": "grafanacloud-kanni-prom"
           },
           "editorMode": "code",
-          "expr": "supabase_request_duration_ms_avg or vector(0)",
-          "legendFormat": "{{operation}} (success={{success}})",
+          "expr": "histogram_quantile(0.95, rate(nginx_http_request_duration_seconds_bucket{job=\"nginx-exporter\"}[5m])) * 1000",
+          "legendFormat": "P95 Request Duration (ms)",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Supabase Request Duration",
+      "title": "Request Duration (P95)",
       "type": "timeseries"
     },
     {
@@ -1224,13 +1224,13 @@
             "uid": "grafanacloud-kanni-prom"
           },
           "editorMode": "code",
-          "expr": "rate(supabase_errors_total[5m]) or vector(0)",
-          "legendFormat": "{{operation}}",
+          "expr": "sum(rate({service_name=\"kanni-ai\"} | logfmt | level=\"ERROR\" [$__interval])) or vector(0)",
+          "legendFormat": "Error Rate",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Supabase Error Rate",
+      "title": "Application Error Rate",
       "type": "timeseries"
     },
     {
@@ -1659,7 +1659,7 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {},

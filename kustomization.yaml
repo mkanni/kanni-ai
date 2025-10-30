@@ -9,7 +9,8 @@ resources:
 - k8s/hpa.yaml
 - k8s/grafana-secret.yaml
 - k8s/otel-collector.yaml
-- k8s/servicemonitor.yaml
+# ServiceMonitor requires Prometheus Operator CRDs - apply separately if needed
+# - k8s/servicemonitor.yaml
 
 images:
 - name: gcr.io/PROJECT_ID/IMAGE:TAG

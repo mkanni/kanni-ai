@@ -21,7 +21,7 @@ spec:
         app: kanni-ai
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "80"
+        prometheus.io/port: "9113"
         prometheus.io/path: "/metrics"
         deployment.kubernetes.io/restartedAt: "placeholder-timestamp"
     spec:

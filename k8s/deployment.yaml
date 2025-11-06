@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
       - name: kanni-ai
-        image: europe-west1-docker.pkg.dev/lucky-antler-476111-g9/kanni-ai/kanni-ai:b2d3e97
+        image: europe-west1-docker.pkg.dev/lucky-antler-476111-g9/kanni-ai/kanni-ai:c364538-prod
         ports:
         - containerPort: 80
         resources:

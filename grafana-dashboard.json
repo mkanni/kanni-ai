@@ -581,7 +581,7 @@
             "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "count_over_time({service_name=\"kanni-ai\"} | logfmt | event_type=\"user_login\" [5m]) > 0 or vector(1)",
+          "expr": "count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"user_login\" [5m]) > 0 or vector(1)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -646,7 +646,7 @@
             "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "count(count_over_time({service_name=\"kanni-ai\"} | logfmt | event_type=\"page_view\" [5m]) by (user_email)) or vector(0)",
+          "expr": "count(count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"page_view\" [5m]) by (user_email)) or vector(0)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -743,7 +743,7 @@
             "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "sum(count_over_time({service_name=\"kanni-ai\"} | logfmt | event_type=\"user_login\" [1h]))",
+          "expr": "sum(count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"user_login\" [1h]))",
           "legendFormat": "User Logins",
           "range": true,
           "refId": "A"
@@ -754,7 +754,7 @@
             "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "sum(count_over_time({service_name=\"kanni-ai\"} | logfmt | event_type=\"interest_created\" [1h]))",
+          "expr": "sum(count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"interest_created\" [1h]))",
           "hide": false,
           "legendFormat": "Interests Created",
           "range": true,
@@ -766,7 +766,7 @@
             "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "sum(count_over_time({service_name=\"kanni-ai\"} | logfmt | event_type=\"tip_generated\" [1h]))",
+          "expr": "sum(count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"tip_generated\" [1h]))",
           "hide": false,
           "legendFormat": "Tips Generated",
           "range": true,
@@ -832,7 +832,7 @@
             "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "sum(count_over_time({service_name=\"kanni-ai\"} | logfmt | event_type=\"user_login\" [24h]))",
+          "expr": "sum(count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"user_login\" [24h]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -897,7 +897,7 @@
             "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "sum(count_over_time({service_name=\"kanni-ai\"} | logfmt | event_type=\"interest_created\" [24h]))",
+          "expr": "sum(count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"interest_created\" [24h]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -962,7 +962,7 @@
             "uid": "grafanacloud-kanni-prom"
           },
           "editorMode": "code",
-          "expr": "sum(count_over_time({service_name=\"kanni-ai\"} | logfmt | event_type=\"tip_generated\" [24h]))",
+          "expr": "sum(count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"tip_generated\" [24h]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1031,7 +1031,7 @@
             "uid": "grafanacloud-kanni-prom"
           },
           "editorMode": "code",
-          "expr": "sum(count_over_time({service_name=\"kanni-ai\"} | logfmt | level=\"ERROR\" [24h]))",
+          "expr": "sum(count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | level=\"ERROR\" [24h]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1224,7 +1224,7 @@
             "uid": "grafanacloud-kanni-prom"
           },
           "editorMode": "code",
-          "expr": "sum(rate({service_name=\"kanni-ai\"} | logfmt | level=\"ERROR\" [$__interval])) or vector(0)",
+          "expr": "sum(rate({service_name=\"kanni-ai-frontend\"} | logfmt | level=\"ERROR\" [$__interval])) or vector(0)",
           "legendFormat": "Error Rate",
           "range": true,
           "refId": "A"
@@ -1269,7 +1269,7 @@
             "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "{service_name=\"kanni-ai\"} | logfmt | line_format `{{.level}} | {{.user_name}} ({{.user_email}}) | Page: {{.page_name}} | {{.event_type}}`",
+          "expr": "{service_name=\"kanni-ai-frontend\"} | logfmt | line_format `{{.level}} | {{.user_name}} ({{.user_email}}) | Page: {{.page_name}} | {{.event_type}}`",
           "queryType": "range",
           "refId": "A"
         }
@@ -1313,7 +1313,7 @@
             "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "{service_name=\"kanni-ai\"} | logfmt | level=\"ERROR\" | line_format `❌ ERROR | {{.user_name}} ({{.user_email}}) | {{.event_type}} | {{.error_message}}`",
+          "expr": "{service_name=\"kanni-ai-frontend\"} | logfmt | level=\"ERROR\" | line_format `❌ ERROR | {{.user_name}} ({{.user_email}}) | {{.event_type}} | {{.error_message}}`",
           "queryType": "range",
           "refId": "A"
         }
@@ -1357,7 +1357,7 @@
             "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "{service_name=\"kanni-ai\"} | logfmt | event_type=~\"user_login|user_logout|interest_created|interest_deleted|tip_generated\" | line_format `{{.event_type}} | {{.user_name}} ({{.user_email}}) | {{.page_name}}`",
+          "expr": "{service_name=\"kanni-ai-frontend\"} | logfmt | event_type=~\"user_login|user_logout|interest_created|interest_deleted|tip_generated\" | line_format `{{.event_type}} | {{.user_name}} ({{.user_email}}) | {{.page_name}}`",
           "queryType": "range",
           "refId": "A"
         }
@@ -1451,7 +1451,7 @@
             "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "sum by (event_type) (count_over_time({service_name=\"kanni-ai\"} | logfmt | event_type!=\"\" [$__interval]))",
+          "expr": "sum by (event_type) (count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type!=\"\" [$__interval]))",
           "queryType": "range",
           "refId": "A"
         }
@@ -1591,7 +1591,7 @@
             "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
-          "expr": "sum by (level) (count_over_time({service_name=\"kanni-ai\"} | logfmt [$__interval]))",
+          "expr": "sum by (level) (count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt [$__interval]))",
           "queryType": "range",
           "refId": "A"
         }
@@ -1636,7 +1636,7 @@
           },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{service_name=\"kanni-ai\"} | logfmt | event_type=\"page_view\" | line_format `📄 Page View | {{.user_name}} ({{.user_email}}) | Page: {{.page_name}} | URL: {{.page_url}}`",
+          "expr": "{service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"page_view\" | line_format `📄 Page View | {{.user_name}} ({{.user_email}}) | Page: {{.page_name}} | URL: {{.page_url}}`",
           "hide": false,
           "queryType": "range",
           "refId": "A"

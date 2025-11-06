@@ -48,7 +48,16 @@ export class SupabaseService {
       }
 
       console.log('Creating Supabase client...');
-      this.supabase = createClient(supabaseUrl, supabaseAnonKey);
+      this.supabase = createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+          storage: window.localStorage,
+          storageKey: 'kanni-ai-auth',
+          flowType: 'pkce'
+        }
+      });
       console.log('Supabase client created successfully');
       
       // Check active session

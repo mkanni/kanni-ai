@@ -24,6 +24,7 @@ export class InterestsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.telemetryService.recordPageView('interests');
     this.supabaseService.user$.subscribe(user => {
       this.currentUser = user;
       if (user) {

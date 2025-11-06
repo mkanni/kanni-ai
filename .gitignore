@@ -26,3 +26,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Quiz and PDF generation files
+quiz/
+scripts/convert-to-pdf.js

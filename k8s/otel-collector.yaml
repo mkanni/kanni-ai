@@ -37,16 +37,34 @@ spec:
       prometheus:
         config:
           scrape_configs:
-            - job_name: 'kanni-ai'
+            - job_name: 'kanni-ai-nginx'
+              static_configs:
+                - targets: ['kanni-ai-service:9113']
+              metrics_path: '/metrics'
+              scrape_interval: 30s
+              scrape_timeout: 10s
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  regex: 'nginx_.*'
+                  action: keep
+                # Rename nginx_http_requests_total to http_requests_total
+                - source_labels: [__name__]
+                  regex: 'nginx_http_requests_total'
+                  target_label: __name__
+                  replacement: 'http_requests_total'
+                - source_labels: [__name__]
+                  target_label: service_name
+                  replacement: 'kanni-ai-frontend'
+            - job_name: 'kanni-ai-app'
               static_configs:
                 - targets: ['kanni-ai-service:80']
-              metrics_path: '/app-metrics'
+              metrics_path: '/metrics.txt'
               scrape_interval: 30s
               scrape_timeout: 10s
               metric_relabel_configs:
                 - source_labels: [__name__]
                   target_label: service_name
-                  replacement: 'kanni-ai'
+                  replacement: 'kanni-ai-frontend'
       # Minimal log collection - only OTLP logs from instrumented applications
 
     processors:

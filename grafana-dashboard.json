@@ -592,8 +592,8 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "grafanacloud-kanni-prom"
+        "type": "loki",
+        "uid": "grafanacloud-kanni-logs"
       },
       "fieldConfig": {
         "defaults": {
@@ -908,8 +908,8 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "grafanacloud-kanni-prom"
+        "type": "loki",
+        "uid": "grafanacloud-kanni-logs"
       },
       "fieldConfig": {
         "defaults": {
@@ -958,8 +958,8 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "grafanacloud-kanni-prom"
+            "type": "loki",
+            "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
           "expr": "sum(count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"tip_generated\" [24h]))",
@@ -973,8 +973,8 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "grafanacloud-kanni-prom"
+        "type": "loki",
+        "uid": "grafanacloud-kanni-logs"
       },
       "fieldConfig": {
         "defaults": {
@@ -1027,8 +1027,8 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "grafanacloud-kanni-prom"
+            "type": "loki",
+            "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
           "expr": "sum(count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | level=\"ERROR\" [24h]))",
@@ -1140,8 +1140,8 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "grafanacloud-kanni-prom"
+        "type": "loki",
+        "uid": "grafanacloud-kanni-logs"
       },
       "fieldConfig": {
         "defaults": {
@@ -1220,8 +1220,8 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "grafanacloud-kanni-prom"
+            "type": "loki",
+            "uid": "grafanacloud-kanni-logs"
           },
           "editorMode": "code",
           "expr": "sum(rate({service_name=\"kanni-ai-frontend\"} | logfmt | level=\"ERROR\" [$__interval])) or vector(0)",

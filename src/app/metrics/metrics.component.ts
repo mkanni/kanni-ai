@@ -27,18 +27,39 @@ export class MetricsComponent implements OnInit {
     
     // Strip HTML and show only metrics text (like /health endpoint)
     setTimeout(() => {
-      while (this.document.body.firstChild) {
-        this.document.body.removeChild(this.document.body.firstChild);
+      // Remove ALL elements including html, head, body
+      const html = this.document.documentElement;
+      while (html.firstChild) {
+        html.removeChild(html.firstChild);
       }
       
+      // Create minimal structure with just pre element
+      const head = this.renderer.createElement('head');
+      const meta = this.renderer.createElement('meta');
+      this.renderer.setAttribute(meta, 'charset', 'utf-8');
+      this.renderer.appendChild(head, meta);
+      
+      const body = this.renderer.createElement('body');
       const pre = this.renderer.createElement('pre');
       const text = this.renderer.createText(this.metrics);
+      
       this.renderer.appendChild(pre, text);
       this.renderer.setStyle(pre, 'font-family', 'monospace');
-      this.renderer.setStyle(pre, 'white-space', 'pre-wrap');
+      this.renderer.setStyle(pre, 'white-space', 'pre');
       this.renderer.setStyle(pre, 'margin', '0');
       this.renderer.setStyle(pre, 'padding', '0');
-      this.renderer.appendChild(this.document.body, pre);
+      this.renderer.setStyle(body, 'margin', '0');
+      this.renderer.setStyle(body, 'padding', '0');
+      
+      this.renderer.appendChild(body, pre);
+      this.renderer.appendChild(html, head);
+      this.renderer.appendChild(html, body);
+      
+      // Set content type (won't work from Angular but good practice)
+      const metaContentType = this.renderer.createElement('meta');
+      this.renderer.setAttribute(metaContentType, 'http-equiv', 'Content-Type');
+      this.renderer.setAttribute(metaContentType, 'content', 'text/plain; charset=utf-8');
+      this.renderer.appendChild(head, metaContentType);
     }, 0);
   }
 

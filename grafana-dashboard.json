@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 22,
+  "id": 21,
   "links": [],
   "panels": [
     {
@@ -70,7 +70,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "12.3.0-18686767985",
+      "pluginVersion": "12.3.0-18940657299.patch4",
       "targets": [
         {
           "datasource": {
@@ -78,7 +78,7 @@
             "uid": "grafanacloud-kanni-prom"
           },
           "editorMode": "code",
-          "expr": "rate(nginx_http_requests_total{job=\"nginx-exporter\"}[5m]) * 60 or vector(0)",
+          "expr": "sum(rate(http_requests_total[5m])) * 60 or vector(0)",
           "legendFormat": "Total Requests",
           "range": true,
           "refId": "A"
@@ -165,7 +165,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.3.0-18686767985",
+      "pluginVersion": "12.3.0-18940657299.patch4",
       "targets": [
         {
           "datasource": {
@@ -173,8 +173,8 @@
             "uid": "grafanacloud-kanni-prom"
           },
           "editorMode": "code",
-          "expr": "sum by (status) (rate(nginx_http_requests_total{job=\"nginx-exporter\"}[5m])) or vector(0)",
-          "legendFormat": "Status {{status}}",
+          "expr": "sum by (method, endpoint, status_code) (rate(http_requests_total[5m])) or vector(0)",
+          "legendFormat": "{{method}} {{endpoint}} ({{status_code}})",
           "range": true,
           "refId": "A"
         }
@@ -184,8 +184,106 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "grafanacloud-kanni-prom"
+        "type": "loki",
+        "uid": "grafanacloud-kanni-logs"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "bars",
+            "fillOpacity": 100,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.0-18940657299.patch4",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-kanni-logs"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "sum by (event_type) (count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type!=\"\" [$__interval]))",
+          "legendFormat": "{{event_type}}",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "📊 Events by Type",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-kanni-logs"
       },
       "fieldConfig": {
         "defaults": {
@@ -236,165 +334,9 @@
               }
             ]
           },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 8
-      },
-      "id": 3,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.0-18686767985",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "grafanacloud-kanni-prom"
-          },
-          "editorMode": "code",
-          "expr": "histogram_quantile(0.99, rate(nginx_http_request_duration_seconds_bucket{job=\"nginx-exporter\"}[5m])) * 1000 or vector(0)",
-          "legendFormat": "P99",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "grafanacloud-kanni-prom"
-          },
-          "editorMode": "code",
-          "expr": "histogram_quantile(0.50, rate(nginx_http_request_duration_seconds_bucket{job=\"nginx-exporter\"}[5m])) * 1000 or vector(0)",
-          "hide": false,
-          "legendFormat": "P50",
-          "range": true,
-          "refId": "B"
-        }
-      ],
-      "title": "HTTP Request Duration",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "grafanacloud-kanni-prom"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "normal"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
           "unit": "short"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*2[0-9]{2}.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "green",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*4[0-9]{2}.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "yellow",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*5[0-9]{2}.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "red",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 8,
@@ -402,12 +344,14 @@
         "x": 12,
         "y": 8
       },
-      "id": 4,
+      "id": 12,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
@@ -416,95 +360,230 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.3.0-18686767985",
+      "pluginVersion": "12.3.0-18940657299.patch4",
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "grafanacloud-kanni-prom"
+            "type": "loki",
+            "uid": "grafanacloud-kanni-logs"
           },
+          "direction": "backward",
           "editorMode": "code",
-          "expr": "sum by (status) (rate(nginx_http_requests_total{job=\"nginx-exporter\"}[5m])) or vector(0)",
-          "legendFormat": "Status {{status}}",
-          "range": true,
+          "expr": "sum by (page_name) (count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"page_view\" | page_name!=\"\" [$__interval]))",
+          "legendFormat": "{{page_name}}",
+          "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "HTTP Status Codes Distribution",
+      "title": "📄 Page Views by Page",
       "type": "timeseries"
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "grafanacloud-kanni-prom"
+        "type": "loki",
+        "uid": "grafanacloud-kanni-logs"
       },
       "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "yellow",
-                "value": 5
-              },
-              {
-                "color": "red",
-                "value": 10
-              }
-            ]
-          },
-          "unit": "short"
-        },
+        "defaults": {},
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
-        "w": 4,
+        "h": 10,
+        "w": 12,
         "x": 0,
         "y": 16
       },
-      "id": 5,
+      "id": 3,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
+        "dedupStrategy": "none",
+        "enableInfiniteScrolling": false,
+        "enableLogDetails": false,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showControls": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "syntaxHighlighting": false,
+        "wrapLogMessage": false
       },
-      "pluginVersion": "12.3.0-18686767985",
+      "pluginVersion": "12.3.0-18940657299.patch4",
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "grafanacloud-kanni-prom"
+            "type": "loki",
+            "uid": "grafanacloud-kanni-logs"
           },
+          "direction": "backward",
           "editorMode": "code",
-          "expr": "sum(rate(nginx_http_requests_total{job=\"nginx-exporter\",status=~\"[45].*\"}[5m])) * 60 or vector(0)",
-          "legendFormat": "__auto",
-          "range": true,
+          "expr": "{service_name=\"kanni-ai-frontend\"} | logfmt | line_format `User {{.user_name}} visited the {{.page_name}} page.` | event_type=\"page_view\"",
+          "hide": false,
+          "queryType": "range",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-kanni-logs"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{service_name=\"kanni-ai-frontend\"} | logfmt | line_format `User {{.user_name}} has removed the interest {{.interest_id}}.` | event_type=\"interest_deleted\"",
+          "hide": false,
+          "queryType": "range",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-kanni-logs"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{service_name=\"kanni-ai-frontend\"} | logfmt | line_format `User {{.user_name}} has created the interest {{.interest_name}}.` | event_type=\"interest_created\"",
+          "hide": false,
+          "queryType": "range",
+          "refId": "C"
+        }
+      ],
+      "title": "📋 All Activity Logs (User, Page & Event)",
+      "type": "logs"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-kanni-logs"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 4,
+      "options": {
+        "dedupStrategy": "none",
+        "enableInfiniteScrolling": false,
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showControls": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "pluginVersion": "12.3.0-18940657299.patch4",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-kanni-logs"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{service_name=\"kanni-ai-frontend\"} | logfmt | event_type=~\"user_login|user_logout\" | line_format `{{.event_type}} | 👤 {{.user_name}} ({{.user_email}})`",
+          "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Errors per Minute",
-      "type": "stat"
+      "title": "👤 Login/Logout Activity",
+      "type": "logs"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-kanni-logs"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 26
+      },
+      "id": 11,
+      "options": {
+        "dedupStrategy": "none",
+        "enableInfiniteScrolling": false,
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showControls": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "pluginVersion": "12.3.0-18940657299.patch4",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-kanni-logs"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{service_name=\"kanni-ai-frontend\"} | logfmt | event_type=~\"interest_created|interest_deleted\" | line_format `{{.event_type}} | 💡 {{.interest_name}} | User: {{.user_name}}`",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "💡 Interest Activity",
+      "type": "logs"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-kanni-logs"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 26
+      },
+      "id": 5,
+      "options": {
+        "dedupStrategy": "none",
+        "enableInfiniteScrolling": false,
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showControls": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "pluginVersion": "12.3.0-18940657299.patch4",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-kanni-logs"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{service_name=\"kanni-ai-frontend\"} | logfmt | line_format `{{.event_type}}: {{.error_type}} | url: {{.error_url}}` | severity_text=\"ERROR\"",
+          "hide": false,
+          "queryType": "range",
+          "refId": "C"
+        }
+      ],
+      "title": "❌ Error Logs",
+      "type": "logs"
     },
     {
       "datasource": {
@@ -552,10 +631,10 @@
       "gridPos": {
         "h": 4,
         "w": 4,
-        "x": 4,
-        "y": 16
+        "x": 0,
+        "y": 36
       },
-      "id": 6,
+      "id": 7,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
@@ -573,27 +652,27 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.3.0-18686767985",
+      "pluginVersion": "12.3.0-18940657299.patch4",
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-kanni-logs"
+            "type": "prometheus",
+            "uid": "grafanacloud-kanni-prom"
           },
           "editorMode": "code",
-          "expr": "count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"user_login\" [5m]) > 0 or vector(1)",
+          "expr": "supabase_connected or vector(0)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Supabase Connection Status",
+      "title": "Supabase Status",
       "type": "stat"
     },
     {
       "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-kanni-logs"
+        "type": "prometheus",
+        "uid": "grafanacloud-kanni-prom"
       },
       "fieldConfig": {
         "defaults": {
@@ -617,197 +696,11 @@
       "gridPos": {
         "h": 4,
         "w": 4,
-        "x": 8,
-        "y": 16
-      },
-      "id": 7,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.0-18686767985",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-kanni-logs"
-          },
-          "editorMode": "code",
-          "expr": "count(count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"page_view\" [5m]) by (user_email)) or vector(0)",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Active Users (Last 5m)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "grafanacloud-kanni-prom"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "bars",
-            "fillOpacity": 100,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 16
+        "x": 4,
+        "y": 36
       },
       "id": 8,
       "options": {
-        "legend": {
-          "calcs": [
-            "sum"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.0-18686767985",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-kanni-logs"
-          },
-          "editorMode": "code",
-          "expr": "sum(count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"user_login\" [1h]))",
-          "legendFormat": "User Logins",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-kanni-logs"
-          },
-          "editorMode": "code",
-          "expr": "sum(count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"interest_created\" [1h]))",
-          "hide": false,
-          "legendFormat": "Interests Created",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-kanni-logs"
-          },
-          "editorMode": "code",
-          "expr": "sum(count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"tip_generated\" [1h]))",
-          "hide": false,
-          "legendFormat": "Tips Generated",
-          "range": true,
-          "refId": "C"
-        }
-      ],
-      "title": "User Activity (Hourly)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "grafanacloud-kanni-prom"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 0,
-        "y": 20
-      },
-      "id": 9,
-      "options": {
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto",
@@ -824,157 +717,27 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.3.0-18686767985",
+      "pluginVersion": "12.3.0-18940657299.patch4",
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-kanni-logs"
+            "type": "prometheus",
+            "uid": "grafanacloud-kanni-prom"
           },
           "editorMode": "code",
-          "expr": "sum(count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"user_login\" [24h]))",
+          "expr": "active_users or vector(0)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Total User Logins (24h)",
+      "title": "Active Users",
       "type": "stat"
     },
     {
       "datasource": {
         "type": "prometheus",
         "uid": "grafanacloud-kanni-prom"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 3,
-        "y": 20
-      },
-      "id": 10,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.0-18686767985",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-kanni-logs"
-          },
-          "editorMode": "code",
-          "expr": "sum(count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"interest_created\" [24h]))",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Total Interests Created (24h)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-kanni-logs"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 6,
-        "y": 20
-      },
-      "id": 11,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.0-18686767985",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-kanni-logs"
-          },
-          "editorMode": "code",
-          "expr": "sum(count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"tip_generated\" [24h]))",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Total Tips Generated (24h)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-kanni-logs"
       },
       "fieldConfig": {
         "defaults": {
@@ -1001,11 +764,11 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
-        "x": 9,
-        "y": 20
+        "w": 4,
+        "x": 8,
+        "y": 36
       },
-      "id": 12,
+      "id": 9,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -1023,105 +786,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.3.0-18686767985",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-kanni-logs"
-          },
-          "editorMode": "code",
-          "expr": "sum(count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | level=\"ERROR\" [24h]))",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Total Errors (24h)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "grafanacloud-kanni-prom"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 20,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 24
-      },
-      "id": 13,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.0-18686767985",
+      "pluginVersion": "12.3.0-18940657299.patch4",
       "targets": [
         {
           "datasource": {
@@ -1129,521 +794,14 @@
             "uid": "grafanacloud-kanni-prom"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, rate(nginx_http_request_duration_seconds_bucket{job=\"nginx-exporter\"}[5m])) * 1000",
-          "legendFormat": "P95 Request Duration (ms)",
+          "expr": "errors_total or vector(0)",
+          "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Request Duration (P95)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-kanni-logs"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 24
-      },
-      "id": 14,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.0-18686767985",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-kanni-logs"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate({service_name=\"kanni-ai-frontend\"} | logfmt | level=\"ERROR\" [$__interval])) or vector(0)",
-          "legendFormat": "Error Rate",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Application Error Rate",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-kanni-logs"
-      },
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 24,
-        "x": 0,
-        "y": 32
-      },
-      "id": 16,
-      "options": {
-        "dedupStrategy": "none",
-        "enableInfiniteScrolling": false,
-        "enableLogDetails": true,
-        "prettifyLogMessage": false,
-        "showCommonLabels": false,
-        "showControls": false,
-        "showLabels": false,
-        "showTime": true,
-        "sortOrder": "Descending",
-        "wrapLogMessage": false
-      },
-      "pluginVersion": "12.3.0-18686767985",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-kanni-logs"
-          },
-          "editorMode": "code",
-          "expr": "{service_name=\"kanni-ai-frontend\"} | logfmt | line_format `{{.level}} | {{.user_name}} ({{.user_email}}) | Page: {{.page_name}} | {{.event_type}}`",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "Application Logs (with User & Page Info)",
-      "type": "logs"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-kanni-logs"
-      },
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 42
-      },
-      "id": 17,
-      "options": {
-        "dedupStrategy": "none",
-        "enableInfiniteScrolling": false,
-        "enableLogDetails": true,
-        "prettifyLogMessage": false,
-        "showCommonLabels": false,
-        "showControls": false,
-        "showLabels": false,
-        "showTime": true,
-        "sortOrder": "Descending",
-        "wrapLogMessage": false
-      },
-      "pluginVersion": "12.3.0-18686767985",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-kanni-logs"
-          },
-          "editorMode": "code",
-          "expr": "{service_name=\"kanni-ai-frontend\"} | logfmt | level=\"ERROR\" | line_format `❌ ERROR | {{.user_name}} ({{.user_email}}) | {{.event_type}} | {{.error_message}}`",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "Error Logs (with User Info)",
-      "type": "logs"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-kanni-logs"
-      },
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 24,
-        "x": 0,
-        "y": 50
-      },
-      "id": 18,
-      "options": {
-        "dedupStrategy": "none",
-        "enableInfiniteScrolling": false,
-        "enableLogDetails": true,
-        "prettifyLogMessage": false,
-        "showCommonLabels": false,
-        "showControls": false,
-        "showLabels": false,
-        "showTime": true,
-        "sortOrder": "Descending",
-        "wrapLogMessage": false
-      },
-      "pluginVersion": "12.3.0-18686767985",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-kanni-logs"
-          },
-          "editorMode": "code",
-          "expr": "{service_name=\"kanni-ai-frontend\"} | logfmt | event_type=~\"user_login|user_logout|interest_created|interest_deleted|tip_generated\" | line_format `{{.event_type}} | {{.user_name}} ({{.user_email}}) | {{.page_name}}`",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "User Activity Logs (with Username & Email)",
-      "type": "logs"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-kanni-logs"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "bars",
-            "fillOpacity": 100,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "normal"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 60
-      },
-      "id": 19,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.0-18686767985",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-kanni-logs"
-          },
-          "editorMode": "code",
-          "expr": "sum by (event_type) (count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt | event_type!=\"\" [$__interval]))",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "Events by Type",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-kanni-logs"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "ERROR"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "red",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "WARN"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "yellow",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "INFO"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "blue",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 60
-      },
-      "id": 20,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.0-18686767985",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-kanni-logs"
-          },
-          "editorMode": "code",
-          "expr": "sum by (level) (count_over_time({service_name=\"kanni-ai-frontend\"} | logfmt [$__interval]))",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "Log Volume by Severity",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-kanni-logs"
-      },
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 24,
-        "x": 0,
-        "y": 68
-      },
-      "id": 21,
-      "options": {
-        "dedupStrategy": "none",
-        "enableInfiniteScrolling": false,
-        "enableLogDetails": true,
-        "prettifyLogMessage": false,
-        "showCommonLabels": false,
-        "showControls": false,
-        "showLabels": false,
-        "showTime": true,
-        "sortOrder": "Descending",
-        "wrapLogMessage": false
-      },
-      "pluginVersion": "12.3.0-18686767985",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-kanni-logs"
-          },
-          "direction": "backward",
-          "editorMode": "code",
-          "expr": "{service_name=\"kanni-ai-frontend\"} | logfmt | event_type=\"page_view\" | line_format `📄 Page View | {{.user_name}} ({{.user_email}}) | Page: {{.page_name}} | URL: {{.page_url}}`",
-          "hide": false,
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "Page Views (with User & Page Details)",
-      "type": "logs"
+      "title": "Total Errors",
+      "type": "stat"
     }
   ],
   "preload": false,
@@ -1652,19 +810,18 @@
   "tags": [
     "kanni-ai",
     "angular",
-    "supabase",
-    "opentelemetry"
+    "supabase"
   ],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Kanni AI - Application Monitoring Dashboard",
-  "uid": "mkxqmsx",
-  "version": 2
+  "title": "Kanni AI - Simple Monitoring",
+  "uid": "kanni-ai-simple",
+  "version": 8
 }

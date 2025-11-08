@@ -36,7 +36,8 @@ const routes: Routes = [
   { path: 'interests', component: InterestsComponent, canActivate: [AuthGuard] },
   { path: 'about', component: AboutComponent },
   { path: 'health', component: HealthComponent },
-  { path: 'app-metrics', component: MetricsComponent },
+  { path: 'metrics', component: MetricsComponent }, // Changed from app-metrics and no AuthGuard
+  { path: 'app-metrics', redirectTo: 'metrics', pathMatch: 'full' }, // Redirect old path
   { path: '404', component: NotFoundComponent },
   { path: '', component: AppComponent, canActivate: [AuthGuard] },
   { path: '**', component: NotFoundComponent }

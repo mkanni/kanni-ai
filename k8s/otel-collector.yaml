@@ -47,21 +47,20 @@ spec:
                 - source_labels: [__name__]
                   regex: 'nginx_.*'
                   action: keep
-                # Rename nginx_http_requests_total to http_requests_total
-                - source_labels: [__name__]
-                  regex: 'nginx_http_requests_total'
-                  target_label: __name__
-                  replacement: 'http_requests_total'
                 - source_labels: [__name__]
                   target_label: service_name
-                  replacement: 'kanni-ai-frontend'
+                  replacement: 'kanni-ai-nginx-exporter'
             - job_name: 'kanni-ai-app'
               static_configs:
                 - targets: ['kanni-ai-service:80']
-              metrics_path: '/metrics.txt'
+              metrics_path: '/metrics'
               scrape_interval: 30s
               scrape_timeout: 10s
               metric_relabel_configs:
+                # Keep only application metrics (not nginx metrics)
+                - source_labels: [__name__]
+                  regex: '(http_requests_total|http_server_request_duration_seconds.*|page_views_total|user_logins_total|errors_total|supabase_connected|active_users|app_uptime_seconds|http_errors_total|http_active_sessions|interests_created_total|tips_generated_total).*'
+                  action: keep
                 - source_labels: [__name__]
                   target_label: service_name
                   replacement: 'kanni-ai-frontend'

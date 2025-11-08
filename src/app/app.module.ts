@@ -36,11 +36,10 @@ const routes: Routes = [
   { path: 'interests', component: InterestsComponent, canActivate: [AuthGuard] },
   { path: 'about', component: AboutComponent },
   { path: 'health', component: HealthComponent },
-  { path: 'metrics', component: MetricsComponent }, // Changed from app-metrics and no AuthGuard
-  { path: 'app-metrics', redirectTo: 'metrics', pathMatch: 'full' }, // Redirect old path
-  { path: '404', component: NotFoundComponent },
-  { path: '', component: AppComponent, canActivate: [AuthGuard] },
-  { path: '**', component: NotFoundComponent }
+  { path: 'metrics', component: MetricsComponent },
+  { path: 'app-metrics', redirectTo: 'metrics', pathMatch: 'full' },
+  { path: '', redirectTo: 'home', pathMatch: 'full' }, // Redirect root to home
+  { path: '**', component: NotFoundComponent } // Catch all undefined routes
 ];
 
 function initializeApp(supabaseService: SupabaseService) {

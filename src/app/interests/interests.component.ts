@@ -24,10 +24,12 @@ export class InterestsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.telemetryService.recordPageView('interests');
     this.supabaseService.user$.subscribe(user => {
       this.currentUser = user;
       if (user) {
+        // Record page view with user information
+        this.telemetryService.recordPageView('interests', user);
+        
         // Extract name from email or use email
         const emailName = user.email?.split('@')[0] || 'User';
         // Capitalize first letter

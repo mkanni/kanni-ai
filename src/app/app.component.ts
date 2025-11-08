@@ -52,13 +52,14 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
-    // Record page view
-    this.telemetryService.recordPageView('home');
-    
     // Subscribe to current user
     this.supabaseService.user$.subscribe(async user => {
       console.log('User state changed:', user);
       this.currentUser = user;
+      
+      // Record page view with user information
+      this.telemetryService.recordPageView('home', user);
+      
       if (user) {
         // Extract name from email or use email
         const emailName = user.email?.split('@')[0] || 'User';

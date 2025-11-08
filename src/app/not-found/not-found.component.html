@@ -1,0 +1,32 @@
+<div class="not-found-container">
+  <app-header></app-header>
+
+  <div class="content">
+    <div class="error-section">
+      <div class="error-code">404</div>
+      <h1>Page Not Found</h1>
+      <p class="error-message">Oops! It looks like you're trying to access a page that doesn't exist.</p>
+      <p class="attempted-url">Attempted URL: <span class="url-text">{{ attemptedUrl }}</span></p>
+      
+      <div class="error-illustration">
+        <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="100" cy="100" r="80" stroke="rgba(102, 126, 234, 0.3)" stroke-width="2" fill="rgba(102, 126, 234, 0.05)"/>
+          <circle cx="100" cy="100" r="60" stroke="rgba(102, 126, 234, 0.4)" stroke-width="2" fill="rgba(102, 126, 234, 0.08)"/>
+          <circle cx="100" cy="100" r="40" stroke="rgba(102, 126, 234, 0.5)" stroke-width="2" fill="rgba(102, 126, 234, 0.1)"/>
+          <path d="M70 90 Q70 80, 80 80 Q90 80, 90 90" stroke="rgba(102, 126, 234, 0.8)" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M110 90 Q110 80, 120 80 Q130 80, 130 90" stroke="rgba(102, 126, 234, 0.8)" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M75 130 Q100 115, 125 130" stroke="rgba(102, 126, 234, 0.8)" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div class="action-section">
+        <button class="home-button" (click)="goHome()">
+          <span class="button-icon">🏠</span>
+          <span>Back to Home</span>
+        </button>
+      </div>
+
+
+    </div>
+  </div>
+</div>

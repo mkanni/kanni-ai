@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { SupabaseService } from '../services/supabase.service';
 import { TelemetryService } from '../services/telemetry.service';
+import { User } from '@supabase/supabase-js';
 
 @Component({
   selector: 'app-login',
@@ -16,6 +17,7 @@ export class LoginComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
   loading = false;
+  currentUser: User | null = null;
 
   constructor(
     private supabaseService: SupabaseService,
@@ -24,10 +26,13 @@ export class LoginComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
-    // Record page view
-    this.telemetryService.recordPageView('login');
-    
     await this.supabaseService.initialize();
+    
+    // Subscribe to user and record page view with user info
+    this.supabaseService.user$.subscribe(user => {
+      this.currentUser = user;
+      this.telemetryService.recordPageView('login', user);
+    });
     
     // Check if user is already logged in
     const session = await this.supabaseService.getSession();

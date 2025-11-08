@@ -25,6 +25,7 @@ export class MetricsService {
     this.counters.set('interests_deleted_total', 0);
     this.counters.set('tips_generated_total', 0);
     this.counters.set('errors_total', 0);
+    this.counters.set('errors_404_total', 0);
     
     console.log(`✅ Metrics service initialized for ${environment.production ? 'production' : 'development'}`);
   }
@@ -141,6 +142,12 @@ export class MetricsService {
 
   recordError(errorType: string = 'unknown') {
     this.incrementCounter('errors_total', 1, { type: errorType });
+  }
+
+  record404Error(url: string) {
+    this.incrementCounter('errors_404_total', 1, { url: url });
+    this.recordError('404');
+    this.recordHttpRequest('GET', url, 404, 0);
   }
 
   recordResponseTime(endpoint: string, duration: number) {

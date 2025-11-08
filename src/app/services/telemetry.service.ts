@@ -36,12 +36,20 @@ export class TelemetryService {
     counter.add(value, attributes);
   }
 
-  recordPageView(pageName: string) {
+  recordPageView(pageName: string, user?: any) {
     this.metricsService.recordPageView(pageName);
+    
+    const userEmail = user?.email || 'anonymous';
+    const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || userEmail.split('@')[0] || 'unknown';
+    
     this.logInfo('Page view', {
+      'user.id': user?.id || 'anonymous',
+      'user.email': userEmail,
+      'user.name': userName,
       'page.name': pageName,
       'page.url': window.location.href,
-      'event.type': 'page_view'
+      'event.type': 'page_view',
+      'timestamp': new Date().toISOString()
     });
   }
 
@@ -168,6 +176,22 @@ export class TelemetryService {
       'error.type': '500',
       'error.context': context || 'unknown',
       'event.type': 'application_error'
+    });
+  }
+
+  log404Error(attemptedUrl: string, user?: any) {
+    const userEmail = user?.email || 'anonymous';
+    const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || userEmail.split('@')[0] || 'unknown';
+    
+    this.metricsService.record404Error(attemptedUrl);
+    this.logError(`Page not found: ${attemptedUrl}`, undefined, {
+      'user.id': user?.id || 'anonymous',
+      'user.email': userEmail,
+      'user.name': userName,
+      'error.type': '404',
+      'error.url': attemptedUrl,
+      'event.type': 'page_not_found',
+      'timestamp': new Date().toISOString()
     });
   }
 

@@ -22,6 +22,7 @@ import { HealthComponent } from './health/health.component';
 import { MetricsComponent } from './metrics/metrics.component';
 import { InterestsComponent } from './interests/interests.component';
 import { AboutComponent } from './about/about.component';
+import { NotFoundComponent } from './not-found/not-found.component';
 import { HeaderComponent } from './shared/header/header.component';
 import { OpenaiService } from './services/openai.service';
 import { SupabaseService } from './services/supabase.service';
@@ -36,8 +37,9 @@ const routes: Routes = [
   { path: 'about', component: AboutComponent },
   { path: 'health', component: HealthComponent },
   { path: 'app-metrics', component: MetricsComponent },
+  { path: '404', component: NotFoundComponent },
   { path: '', component: AppComponent, canActivate: [AuthGuard] },
-  { path: '**', redirectTo: '/login' }
+  { path: '**', component: NotFoundComponent }
 ];
 
 function initializeApp(supabaseService: SupabaseService) {
@@ -53,6 +55,7 @@ function initializeApp(supabaseService: SupabaseService) {
     MetricsComponent,
     InterestsComponent,
     AboutComponent,
+    NotFoundComponent,
     HeaderComponent
   ],
   imports: [
